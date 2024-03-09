@@ -2,19 +2,33 @@ package form;
 
 import chart.ModelChartLine;
 import chart.ModelChartPie;
+import com.fazecast.jSerialComm.SerialPort;
+import com.fazecast.jSerialComm.SerialPortDataListener;
+import com.fazecast.jSerialComm.SerialPortEvent;
 import model.ModelStaff;
 import java.awt.Color;
+import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
+import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class Form_1 extends javax.swing.JPanel {
+public class FormDashboard extends javax.swing.JPanel {
 
-    public Form_1() {
+    private SerialPort serial;
+    private final String dataBuffer = "";
+    private String temp = "";
+    private String hasil = "";
+    
+    public FormDashboard() {
         initComponents();
         initData();
+        initSerial();
     }
 
     private void initData() {
@@ -54,6 +68,7 @@ public class Form_1 extends javax.swing.JPanel {
         list.add(new ModelChartLine("Sunday", 200));
         chartLine1.setModel(list);
     }
+    
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -133,4 +148,105 @@ public class Form_1 extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane1;
     private swing.Table table1;
     // End of variables declaration//GEN-END:variables
+
+    private void initSerial(){
+        try {
+            SerialPort[] portList = SerialPort.getCommPorts();
+            if(portList.length > 0){
+                serial = portList[0];
+                serial.setBaudRate(115200);
+                serial.setNumDataBits(8);
+                serial.setNumStopBits(1);
+                serial.setParity(0);
+                
+                
+                if (serial.isOpen()) {
+                    serial.closePort();
+                    System.out.println("Tertutup");
+                    
+                    serial.openPort();
+                    System.out.println("Terbuka");
+                    
+                    ProgresBarClass runSimpan = new ProgresBarClass(serial);
+                    runSimpan.execute();
+                    
+                }else{
+                    serial.openPort();
+                    System.out.println("Terbuka");
+                    
+                    ProgresBarClass runSimpan = new ProgresBarClass(serial);
+                    runSimpan.execute();
+                }
+            }
+        } catch (NumberFormatException | HeadlessException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
+    }
+    
+    private class ProgresBarClass extends SwingWorker<String, Void> {
+
+        private final SerialPort serial;
+
+        public ProgresBarClass(SerialPort serial) {
+            this.serial = serial;
+        }
+
+        @Override
+        protected void done() {
+
+        }
+
+        @Override
+        protected String doInBackground() {
+            SerialEventHandling(serial);
+            String hasil = "sukses";
+            return hasil;
+        }
+    }
+    
+    private void SerialEventHandling(SerialPort activePort) {
+        activePort.addDataListener(new SerialPortDataListener() {
+            @Override
+            public int getListeningEvents() {
+                return SerialPort.LISTENING_EVENT_DATA_RECEIVED;
+            }
+
+            @Override
+            public void serialEvent(SerialPortEvent event) {
+                byte[] data = event.getReceivedData();
+                //String s = new String(data);
+                for (int i = 0; i < data.length; i++) {
+                    switch ((char) data[i]) {
+                        case '{':
+                            temp += (char) data[i];
+                            break;
+                        case '}':
+                            temp += (char) data[i];
+                            hasil = temp;
+                            System.out.println(hasil);
+//                            try {
+//                                JSONObject obj = new JSONObject(hasil);
+//                                int nama = Integer.parseInt(obj.get("Nama").toString());
+//                                //String waktu = obj.get("waktu").toString();
+//                                String waktu1 = g.getCurtimeFormat();
+//                                int score = Integer.parseInt(obj.get("Skor").toString());
+//                                double prosen = ((double)score / 10) * 100;
+//                                int convert_prosen = (int)prosen;
+//
+//                                setGrafik(nama, waktu1, convert_prosen, score);
+//                            } catch (JSONException ex) {
+//                            }
+
+                            temp = "";
+                            hasil = "";
+
+                            break;
+                        default:
+                            temp += (char) data[i];
+                            break;
+                    }
+                }
+            }
+        });
+    }
 }

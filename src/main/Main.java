@@ -2,7 +2,7 @@ package main;
 
 import component.MenuLayout;
 import event.EventMenuSelected;
-import form.Form_1;
+import form.FormDashboard;
 import form.Form_2;
 import form.MainForm;
 import swing.WindowSnapshots;
@@ -25,7 +25,7 @@ public class Main extends javax.swing.JFrame {
     private final MenuLayout menu;
     private final Animator animator;
     private final WindowSnapshots windowSnapshots;
-
+    
     public Main() {
         initComponents();
         layout = new MigLayout("fill", "0[fill]0", "0[fill]0");
@@ -109,7 +109,7 @@ public class Main extends javax.swing.JFrame {
             @Override
             public void selected(int index) {
                 if (index == 0) {
-                    main.show(new Form_1());
+                    main.show(new FormDashboard());
                 } else if (index == 1) {
                     main.show(new Form_2());
                 } else if (index == 3) {
@@ -127,6 +127,14 @@ public class Main extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         mainPanel.setBackground(new java.awt.Color(250, 250, 250));
         mainPanel.setOpaque(true);
@@ -156,6 +164,14 @@ public class Main extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        
+    }//GEN-LAST:event_formWindowOpened
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+
+    }//GEN-LAST:event_formWindowClosing
 
     /**
      * @param args the command line arguments
@@ -197,4 +213,6 @@ public class Main extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLayeredPane mainPanel;
     // End of variables declaration//GEN-END:variables
+
+    
 }
