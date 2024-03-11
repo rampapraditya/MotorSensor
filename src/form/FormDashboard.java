@@ -11,10 +11,13 @@ import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
+import modul.Global;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,7 +31,8 @@ public class FormDashboard extends javax.swing.JPanel {
     public FormDashboard() {
         initComponents();
         initData();
-        initSerial();
+        //initSerial();
+        initTask();
     }
 
     private void initData() {
@@ -149,6 +153,21 @@ public class FormDashboard extends javax.swing.JPanel {
     private swing.Table table1;
     // End of variables declaration//GEN-END:variables
 
+    class SayHello extends TimerTask {
+        @Override
+        public void run() {
+            Global g = new Global();
+            System.out.println("Start " + g.getCurtimeFormat()); 
+            initSerial();
+        }
+    }
+
+    private void initTask(){
+        // jalan tiap 5 detik
+        Timer timer = new Timer();
+        timer.schedule(new SayHello(), 0, 5000);
+    }
+    
     private void initSerial(){
         try {
             SerialPort[] portList = SerialPort.getCommPorts();
@@ -223,7 +242,6 @@ public class FormDashboard extends javax.swing.JPanel {
                         case '}':
                             temp += (char) data[i];
                             hasil = temp;
-                            System.out.println(hasil);
 //                            try {
 //                                JSONObject obj = new JSONObject(hasil);
 //                                int nama = Integer.parseInt(obj.get("Nama").toString());

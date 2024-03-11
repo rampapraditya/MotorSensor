@@ -1,6 +1,5 @@
 package form;
 
-import com.fazecast.jSerialComm.SerialPort;
 import java.awt.Component;
 import java.awt.event.ActionListener;
 import javax.swing.JFrame;
@@ -9,7 +8,7 @@ public class MainForm extends javax.swing.JPanel {
 
     public MainForm() {
         initComponents();
-        show(new FormDashboard());
+        show(new FormDashboard1());
     }
 
     @SuppressWarnings("unchecked")

@@ -2,7 +2,7 @@ package main;
 
 import component.MenuLayout;
 import event.EventMenuSelected;
-import form.FormDashboard;
+import form.FormDashboard1;
 import form.Form_2;
 import form.MainForm;
 import swing.WindowSnapshots;
@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import net.miginfocom.swing.MigLayout;
@@ -28,6 +29,7 @@ public class Main extends javax.swing.JFrame {
     
     public Main() {
         initComponents();
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         layout = new MigLayout("fill", "0[fill]0", "0[fill]0");
         main = new MainForm();
         menu = new MenuLayout();
@@ -94,6 +96,7 @@ public class Main extends javax.swing.JFrame {
                 }
             }
         });
+        
         main.addEventMenu(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -105,11 +108,12 @@ public class Main extends javax.swing.JFrame {
                 }
             }
         });
+//        
         menu.getMenu().addEventMenuSelected(new EventMenuSelected() {
             @Override
             public void selected(int index) {
                 if (index == 0) {
-                    main.show(new FormDashboard());
+                    main.show(new FormDashboard1());
                 } else if (index == 1) {
                     main.show(new Form_2());
                 } else if (index == 3) {
