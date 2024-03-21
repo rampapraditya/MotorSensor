@@ -6,6 +6,7 @@ import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import javax.swing.SwingUtilities;
 
 public class Card extends javax.swing.JPanel {
 
@@ -42,6 +43,12 @@ public class Card extends javax.swing.JPanel {
     }
     
     public void setValue(String nilai) {
+//        SwingUtilities.invokeLater(new Runnable() {
+//            @Override
+//            public void run() {
+//                lbValues.setText(nilai);
+//            }
+//        });
         lbValues.setText(nilai);
     }
 

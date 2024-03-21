@@ -4,6 +4,7 @@ import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
 import java.awt.HeadlessException;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.ImageIcon;
@@ -22,11 +23,18 @@ public class FormDashboard1 extends javax.swing.JPanel {
     private String hasil = "";
     private Global g = new Global();
     
+    private ArrayList<String> wadah_xa = new ArrayList<>();
+    private ArrayList<String> wadah_ya = new ArrayList<>();
+    private ArrayList<String> wadah_za = new ArrayList<>();
+    
+    
     public FormDashboard1() {
         initComponents();
         
-        cardPure.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "Value", "X\nY\nZ", ""));
-        cardRMS.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "RMS", "0", ""));
+        resetNilaiXYZ();
+        
+        cardPure.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "Value", "X : 0  Y : 0  Z : 0", ""));
+        cardRMS.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "RMS", "X : 0  Y : 0  Z : 0", ""));
         cardAverage.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "Average", "0", ""));
         cardMax.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "Max", "0", ""));
         cardMin.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "Min", "0", ""));
@@ -108,6 +116,12 @@ public class FormDashboard1 extends javax.swing.JPanel {
         timer.schedule(new SayHello(), 0, 5000);
     }
     
+    private void resetNilaiXYZ(){
+        wadah_xa.clear();
+        wadah_ya.clear();
+        wadah_za.clear();
+    }
+    
     private void initSerial(){
         try {
             SerialPort[] portList = SerialPort.getCommPorts();
@@ -163,6 +177,31 @@ public class FormDashboard1 extends javax.swing.JPanel {
         }
     }
     
+    private void masukkandata(String x, String y, String z){
+        if(wadah_xa.size() > 93){
+            // melakukan rumusan
+            try {
+                int jml_xa = 0;
+                int jml_ya = 0;
+                int jml_za = 0;
+
+                for (int i = 0; i < wadah_xa.size(); i++) {
+                    jml_xa += wadah_xa.get(i).hashCode();
+                    jml_ya += wadah_ya.get(i).hashCode();
+                    jml_za += wadah_za.get(i).hashCode();
+                }
+                cardRMS.setValue("X : " + jml_xa + "  Y : " + jml_ya + "  Z : " + jml_za);   
+            } catch (NumberFormatException e) {
+                System.out.println(e);
+            }
+            resetNilaiXYZ();
+        }
+        
+        wadah_xa.add(x);
+        wadah_ya.add(y);
+        wadah_za.add(z);
+    }
+    
     private void SerialEventHandling(SerialPort activePort) {
         activePort.addDataListener(new SerialPortDataListener() {
             @Override
@@ -187,7 +226,10 @@ public class FormDashboard1 extends javax.swing.JPanel {
                                 String xa = obj.get("xa").toString();
                                 String ya = obj.get("ya").toString();
                                 String za = obj.get("za").toString();
+                                
+                                
                                 cardPure.setValue("X : " + xa + "  Y : " + ya + "  Z : " + za);
+                                masukkandata(xa, ya, za);
                                 
 
 //                                setGrafik(nama, waktu1, convert_prosen, score);

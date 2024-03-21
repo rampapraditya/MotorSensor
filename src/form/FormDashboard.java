@@ -18,8 +18,6 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 import modul.Global;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class FormDashboard extends javax.swing.JPanel {
 
