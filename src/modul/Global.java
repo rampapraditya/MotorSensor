@@ -17,6 +17,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -451,6 +452,11 @@ public class Global {
         String b = a.substring(2, a.length());
         String c = b.replace(',', '.');
         return c;
+    }
+    
+    public String pembulatan(double x){
+        DecimalFormat df = new DecimalFormat("#.####");
+        return df.format(x);
     }
     
     public void buatKolomSesuai(JTable t){

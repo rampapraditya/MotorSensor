@@ -66,7 +66,7 @@ public class Card extends javax.swing.JPanel {
         lbTitle.setForeground(new java.awt.Color(255, 255, 255));
         lbTitle.setText("Title");
 
-        lbValues.setFont(new java.awt.Font("sansserif", 1, 11)); // NOI18N
+        lbValues.setFont(new java.awt.Font("sansserif", 1, 9)); // NOI18N
         lbValues.setForeground(new java.awt.Color(255, 255, 255));
         lbValues.setText("Values");
 
@@ -80,7 +80,7 @@ public class Card extends javax.swing.JPanel {
                     .addComponent(lbValues)
                     .addComponent(lbTitle)
                     .addComponent(lbIcon))
-                .addContainerGap(198, Short.MAX_VALUE))
+                .addContainerGap(206, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
