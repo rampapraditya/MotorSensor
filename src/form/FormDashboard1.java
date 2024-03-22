@@ -65,7 +65,6 @@ public class FormDashboard1 extends javax.swing.JPanel {
         seriesXA = new TimeSeries("X Axis", Millisecond.class);
         datasetXA = new TimeSeriesCollection(seriesXA);
         chartXA = createChart(datasetXA);
-
         chartPanelXA = new ChartPanel(chartXA);
         chartXA.setBackgroundPaint(Color.white);
         chartXA.getPlot().setBackgroundPaint(Color.white);
@@ -76,12 +75,20 @@ public class FormDashboard1 extends javax.swing.JPanel {
         seriesYA = new TimeSeries("Y Axis", Millisecond.class);
         datasetYA = new TimeSeriesCollection(seriesYA);
         chartYA = createChartY(datasetYA);
-
         chartPanelYA = new ChartPanel(chartYA);
         chartYA.setBackgroundPaint(Color.white);
         chartYA.getPlot().setBackgroundPaint(Color.white);
         panelLineY.add(chartPanelYA);
         panelLineY.setBackground(Color.white);
+        
+        seriesZA = new TimeSeries("Z Axis", Millisecond.class);
+        datasetZA = new TimeSeriesCollection(seriesZA);
+        chartZA = createChartZ(datasetZA);
+        chartPanelZA = new ChartPanel(chartZA);
+        chartZA.setBackgroundPaint(Color.white);
+        chartZA.getPlot().setBackgroundPaint(Color.white);
+        panelLineZ.add(chartPanelZA);
+        panelLineZ.setBackground(Color.white);
     }
 
     @SuppressWarnings("unchecked")
@@ -313,8 +320,7 @@ public class FormDashboard1 extends javax.swing.JPanel {
                 c = g.pembulatan(min_z);
                 cardMin.setValue("X : " + a + "  Y : " + b + "  Z : " + c);
                 
-//                seriesXA.add(new Millisecond(), x);
-//                seriesYA.add(new Millisecond(), y);
+
             } catch (NumberFormatException e) {
                 System.out.println(e);
                 jml_xa = 0;
@@ -367,6 +373,7 @@ public class FormDashboard1 extends javax.swing.JPanel {
                                         try {
                                             seriesXA.add(new Millisecond(), xa);
                                             seriesYA.add(new Millisecond(), ya);
+                                            seriesZA.add(new Millisecond(), za);
                                         } catch (Exception ex) {
                                         }
                                         
@@ -399,7 +406,7 @@ public class FormDashboard1 extends javax.swing.JPanel {
 
     private JFreeChart createChart(final XYDataset dataset) {
         JFreeChart result = ChartFactory.createTimeSeriesChart(
-                "Axis",
+                "X Axis",
                 "Time",
                 "Value",
                 dataset,
@@ -422,7 +429,30 @@ public class FormDashboard1 extends javax.swing.JPanel {
     
     private JFreeChart createChartY(final XYDataset dataset) {
         JFreeChart result = ChartFactory.createTimeSeriesChart(
-                "Axis",
+                "Y Axis",
+                "Time",
+                "Value",
+                dataset,
+                true,
+                true,
+                false
+        );
+        XYPlot plot = result.getXYPlot();
+        DateAxis dateAxis = new DateAxis();
+        dateAxis.setDateFormatOverride(new SimpleDateFormat("HH:m:ss")); 
+        plot.setDomainAxis(dateAxis);
+        
+        ValueAxis axis = plot.getDomainAxis();
+        axis.setAutoRange(true);
+        axis.setFixedAutoRange(500.0);  // 60 seconds
+        axis = plot.getRangeAxis();
+        axis.setRange(-20.0, 20.0);
+        return result;
+    }
+    
+    private JFreeChart createChartZ(final XYDataset dataset) {
+        JFreeChart result = ChartFactory.createTimeSeriesChart(
+                "Z Axis",
                 "Time",
                 "Value",
                 dataset,
