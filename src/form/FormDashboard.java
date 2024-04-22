@@ -8,14 +8,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
 import javax.swing.ImageIcon;
-import javax.swing.SwingWorker;
 import model.ModelCard;
 import modul.Global;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
-import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
@@ -39,9 +37,15 @@ public class FormDashboard extends javax.swing.JPanel {
     private final ArrayList<Double> wadah_ya = new ArrayList<>();
     private final ArrayList<Double> wadah_za = new ArrayList<>();
 
-    private double lastValueXA = 0.0;
-    private double lastValueYA = 0.0;
-    private double lastValueZA = 0.0;
+    private boolean statusKalibrasi = false;
+    private double nilaiAcuanX = 0.0;
+    private String tandaBacaX = "+";
+
+    private double nilaiAcuanY = 0.0;
+    private String tandaBacaY = "+";
+
+    private double nilaiAcuanZ = 0.0;
+    private String tandaBacaZ = "+";
 
     // untuk final
     private final TimeSeriesCollection datasetFinal = new TimeSeriesCollection();
@@ -223,6 +227,11 @@ public class FormDashboard extends javax.swing.JPanel {
         panelBawah.add(btnConnect);
 
         btnCalibrasi.setText("Calibrasi");
+        btnCalibrasi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCalibrasiActionPerformed(evt);
+            }
+        });
         panelBawah.add(btnCalibrasi);
 
         btnSave.setText("Save");
@@ -263,15 +272,57 @@ public class FormDashboard extends javax.swing.JPanel {
                                 double ya = Double.parseDouble(obj.get("ya").toString());
                                 double za = Double.parseDouble(obj.get("za").toString());
 
-                                cardPure.setValue("X : " + xa + "  Y : " + ya + "  Z : " + za);
-                                masukkandata(xa, ya, za);
+                                if (statusKalibrasi) {
+                                    if (tandaBacaX.equals("+")) {
+                                        xa += nilaiAcuanX;
+                                    } else {
+                                        xa -= nilaiAcuanX;
+                                    }
 
-                                try {
-                                    Millisecond milis = new Millisecond();
-                                    seriesXA.add(milis, xa);
-                                    seriesYA.add(milis, ya);
-                                    seriesZA.add(milis, za);
-                                } catch (Exception ex) {
+                                    if (tandaBacaY.equals("+")) {
+                                        ya += nilaiAcuanY;
+                                    } else {
+                                        ya -= nilaiAcuanY;
+                                    }
+
+                                    if (tandaBacaZ.equals("+")) {
+                                        za += nilaiAcuanZ;
+                                    } else {
+                                        za -= nilaiAcuanZ;
+                                    }
+
+                                    String a = g.pembulatan(xa);
+                                    String b = g.pembulatan(ya);
+                                    String c = g.pembulatan(za);
+
+                                    cardPure.setValue("X : " + a + "  Y : " + b + "  Z : " + c);
+
+                                    masukkandata(xa, ya, za);
+
+                                    try {
+                                        Millisecond milis = new Millisecond();
+                                        seriesXA.add(milis, xa);
+                                        seriesYA.add(milis, ya);
+                                        seriesZA.add(milis, za);
+                                    } catch (Exception ex) {
+                                    }
+
+                                } else {
+
+                                    String a = g.pembulatan(xa);
+                                    String b = g.pembulatan(ya);
+                                    String c = g.pembulatan(za);
+
+                                    cardPure.setValue("X : " + a + "  Y : " + b + "  Z : " + c);
+                                    masukkandata(xa, ya, za);
+
+                                    try {
+                                        Millisecond milis = new Millisecond();
+                                        seriesXA.add(milis, xa);
+                                        seriesYA.add(milis, ya);
+                                        seriesZA.add(milis, za);
+                                    } catch (Exception ex) {
+                                    }
                                 }
                             }
                         } catch (NumberFormatException | JSONException e) {
@@ -285,8 +336,47 @@ public class FormDashboard extends javax.swing.JPanel {
             serial.closePort();
             cbCom.setEnabled(true);
             btnConnect.setText("Connect");
+
         }
     }//GEN-LAST:event_btnConnectActionPerformed
+
+    private void btnCalibrasiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCalibrasiActionPerformed
+        statusKalibrasi = true;
+
+        double nilaiX = Collections.max(wadah_xa);
+        double nilaiY = Collections.max(wadah_ya);
+        double nilaiZ = Collections.max(wadah_za);
+
+        // menentukan nilai acuan
+        if (nilaiX > 0) {
+            nilaiAcuanX = nilaiX;
+            tandaBacaX = "-";
+        } else {
+            nilaiX = Collections.min(wadah_xa);
+            nilaiAcuanX = Math.abs(nilaiX);
+            tandaBacaX = "+";
+        }
+
+        if (nilaiY > 0) {
+            nilaiAcuanY = nilaiY;
+            tandaBacaY = "-";
+        } else {
+            nilaiY = Collections.min(wadah_ya);
+            nilaiAcuanY = Math.abs(nilaiY);
+            tandaBacaY = "+";
+        }
+
+        if (nilaiZ > 0) {
+            nilaiAcuanZ = nilaiZ;
+            tandaBacaZ = "-";
+        } else {
+            nilaiZ = Collections.min(wadah_za);
+            nilaiAcuanZ = Math.abs(nilaiZ);
+            tandaBacaZ = "+";
+        }
+
+        btnCalibrasi.setEnabled(false);
+    }//GEN-LAST:event_btnCalibrasiActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -322,31 +412,35 @@ public class FormDashboard extends javax.swing.JPanel {
     }
 
     private void masukkandata(double x, double y, double z) {
+        wadah_xa.add(x);
+        wadah_ya.add(y);
+        wadah_za.add(z);
+
         if (wadah_xa.size() > 93) {
             double jml_xa = 0;
             double jml_ya = 0;
             double jml_za = 0;
             try {
 
-                double rata_xa = 0;
-                double rata_ya = 0;
-                double rata_za = 0;
-
                 for (int i = 0; i < wadah_xa.size(); i++) {
                     jml_xa += wadah_xa.get(i);
                     jml_ya += wadah_ya.get(i);
                     jml_za += wadah_za.get(i);
                 }
-                rata_xa = jml_xa / 94;
-                rata_ya = jml_ya / 94;
-                rata_za = jml_za / 94;
 
-                String a = g.pembulatan(jml_xa);
-                String b = g.pembulatan(jml_ya);
-                String c = g.pembulatan(jml_za);
+                double RMS_X = Math.sqrt(jml_xa / 94);
+                double RMS_Y = Math.sqrt(jml_ya / 94);
+                double RMS_Z = Math.sqrt(jml_za / 94);
+                String a = g.pembulatan(RMS_X);
+                String b = g.pembulatan(RMS_Y);
+                String c = g.pembulatan(RMS_Z);
                 cardRMS.setValue("X : " + a + "  Y : " + b + "  Z : " + c);
 
                 // menghitung rata2
+                double rata_xa = jml_xa / 94;
+                double rata_ya = jml_ya / 94;
+                double rata_za = jml_za / 94;
+
                 a = g.pembulatan(rata_xa);
                 b = g.pembulatan(rata_ya);
                 c = g.pembulatan(rata_za);
@@ -380,10 +474,6 @@ public class FormDashboard extends javax.swing.JPanel {
             jml_ya = 0;
             jml_za = 0;
         }
-
-        wadah_xa.add(x);
-        wadah_ya.add(y);
-        wadah_za.add(z);
 
     }
 
