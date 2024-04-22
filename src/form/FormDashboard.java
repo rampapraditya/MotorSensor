@@ -8,21 +8,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
 import javax.swing.ImageIcon;
-import javax.swing.SwingWorker;
 import model.ModelCard;
 import modul.Global;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
-import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.time.Day;
 import org.jfree.data.time.Millisecond;
-import org.jfree.data.time.Month;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
@@ -41,19 +37,28 @@ public class FormDashboard extends javax.swing.JPanel {
     private final ArrayList<Double> wadah_ya = new ArrayList<>();
     private final ArrayList<Double> wadah_za = new ArrayList<>();
 
-    private TimeSeries seriesXA, seriesYA, seriesZA, seriesFinal;
-    private double lastValueXA = 0.0;
-    private double lastValueYA = 0.0;
-    private double lastValueZA = 0.0;
-    private TimeSeriesCollection datasetXA, datasetYA, datasetZA, datasetFinal;
-    private JFreeChart chartXA, chartYA, chartZA, chartFinal;
-    private ChartPanel chartPanelXA, chartPanelYA, chartPanelZA, chartPanelFinal;
+    private boolean statusKalibrasi = false;
+    private double nilaiAcuanX = 0.0;
+    private String tandaBacaX = "+";
+
+    private double nilaiAcuanY = 0.0;
+    private String tandaBacaY = "+";
+
+    private double nilaiAcuanZ = 0.0;
+    private String tandaBacaZ = "+";
 
     // untuk final
-    TimeSeries s1 = new TimeSeries("X Axis", Millisecond.class);
-    TimeSeries s2 = new TimeSeries("Y Axis", Millisecond.class);
+    private final TimeSeriesCollection datasetFinal = new TimeSeriesCollection();
 
-    TimeSeriesCollection dataset = new TimeSeriesCollection();
+    // XA
+    private final TimeSeriesCollection datasetXA = new TimeSeriesCollection();
+    private final TimeSeries seriesXA = new TimeSeries("X Axis", Millisecond.class);
+    // YA
+    private final TimeSeriesCollection datasetYA = new TimeSeriesCollection();
+    private final TimeSeries seriesYA = new TimeSeries("Y Axis", Millisecond.class);
+    // ZA
+    private final TimeSeriesCollection datasetZA = new TimeSeriesCollection();
+    private final TimeSeries seriesZA = new TimeSeries("Z Axis", Millisecond.class);
 
     public FormDashboard() {
         initComponents();
@@ -73,36 +78,29 @@ public class FormDashboard extends javax.swing.JPanel {
             cbCom.addItem(portnames[i].getSystemPortName());
         }
 
-        seriesXA = new TimeSeries("X Axis", Millisecond.class);
-        datasetXA = new TimeSeriesCollection(seriesXA);
-        chartXA = createChartX(datasetXA);
-        chartPanelXA = new ChartPanel(chartXA);
+        XYDataset datasetTempXA = createDatasetXA();
+        JFreeChart chartXA = createChart(datasetTempXA, "X Axis", "Time", "Value");
         chartXA.setBackgroundPaint(Color.white);
-        chartXA.getPlot().setBackgroundPaint(Color.white);
+        ChartPanel chartPanelXA = new ChartPanel(chartXA);
         panelLineX.add(chartPanelXA);
         panelLineX.setBackground(Color.white);
 
-        seriesYA = new TimeSeries("Y Axis", Millisecond.class);
-        datasetYA = new TimeSeriesCollection(seriesYA);
-        chartYA = createChartY(datasetYA);
-        chartPanelYA = new ChartPanel(chartYA);
+        XYDataset datasetTempYA = createDatasetYA();
+        JFreeChart chartYA = createChart(datasetTempYA, "Y Axis", "Time", "Value");
         chartYA.setBackgroundPaint(Color.white);
-        chartYA.getPlot().setBackgroundPaint(Color.white);
+        ChartPanel chartPanelYA = new ChartPanel(chartYA);
         panelLineY.add(chartPanelYA);
         panelLineY.setBackground(Color.white);
 
-        seriesZA = new TimeSeries("Z Axis", Millisecond.class);
-        datasetZA = new TimeSeriesCollection(seriesZA);
-        chartZA = createChartZ(datasetZA);
-        chartPanelZA = new ChartPanel(chartZA);
+        XYDataset datasetTempZA = createDatasetZA();
+        JFreeChart chartZA = createChart(datasetTempZA, "Z Axis", "Time", "Value");
         chartZA.setBackgroundPaint(Color.white);
-        chartZA.getPlot().setBackgroundPaint(Color.white);
+        ChartPanel chartPanelZA = new ChartPanel(chartZA);
         panelLineZ.add(chartPanelZA);
         panelLineZ.setBackground(Color.white);
 
-
         XYDataset datasetFn = createDataset();
-        JFreeChart chart = createChart(datasetFn);
+        JFreeChart chart = createChart(datasetFn, "XYZ Axis", "Time", "Value");
         chart.setBackgroundPaint(Color.white);
         ChartPanel chartPanel = new ChartPanel(chart);
         panelGrafikTengah.add(chartPanel);
@@ -133,7 +131,9 @@ public class FormDashboard extends javax.swing.JPanel {
         panelBawah = new javax.swing.JPanel();
         cbCom = new javax.swing.JComboBox<>();
         btnConnect = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        btnCalibrasi = new javax.swing.JButton();
+        btnSave = new javax.swing.JButton();
+        btnAnalisis = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(250, 250, 250));
         setLayout(new java.awt.BorderLayout());
@@ -226,13 +226,19 @@ public class FormDashboard extends javax.swing.JPanel {
         });
         panelBawah.add(btnConnect);
 
-        jButton1.setText("Coba");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnCalibrasi.setText("Calibrasi");
+        btnCalibrasi.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnCalibrasiActionPerformed(evt);
             }
         });
-        panelBawah.add(jButton1);
+        panelBawah.add(btnCalibrasi);
+
+        btnSave.setText("Save");
+        panelBawah.add(btnSave);
+
+        btnAnalisis.setText("Analisis");
+        panelBawah.add(btnAnalisis);
 
         add(panelBawah, java.awt.BorderLayout.SOUTH);
     }// </editor-fold>//GEN-END:initComponents
@@ -266,34 +272,58 @@ public class FormDashboard extends javax.swing.JPanel {
                                 double ya = Double.parseDouble(obj.get("ya").toString());
                                 double za = Double.parseDouble(obj.get("za").toString());
 
-                                cardPure.setValue("X : " + xa + "  Y : " + ya + "  Z : " + za);
-                                masukkandata(xa, ya, za);
-
-                                SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
-                                    @Override
-                                    public String doInBackground() {
-                                        try {
-                                            Millisecond milis = new Millisecond();
-                                            seriesXA.add(milis, xa);
-                                            seriesYA.add(milis, ya);
-                                            seriesZA.add(milis, za);
-
-
-
-                                            s1.add(milis, xa);
-                                            s2.add(milis, ya);
-                                        } catch (Exception ex) {
-                                        }
-
-                                        return "";
+                                if (statusKalibrasi) {
+                                    if (tandaBacaX.equals("+")) {
+                                        xa += nilaiAcuanX;
+                                    } else {
+                                        xa -= nilaiAcuanX;
                                     }
 
-                                    @Override
-                                    protected void done() {
-
+                                    if (tandaBacaY.equals("+")) {
+                                        ya += nilaiAcuanY;
+                                    } else {
+                                        ya -= nilaiAcuanY;
                                     }
-                                };
-                                worker.execute();
+
+                                    if (tandaBacaZ.equals("+")) {
+                                        za += nilaiAcuanZ;
+                                    } else {
+                                        za -= nilaiAcuanZ;
+                                    }
+
+                                    String a = g.pembulatan(xa);
+                                    String b = g.pembulatan(ya);
+                                    String c = g.pembulatan(za);
+
+                                    cardPure.setValue("X : " + a + "  Y : " + b + "  Z : " + c);
+
+                                    masukkandata(xa, ya, za);
+
+                                    try {
+                                        Millisecond milis = new Millisecond();
+                                        seriesXA.add(milis, xa);
+                                        seriesYA.add(milis, ya);
+                                        seriesZA.add(milis, za);
+                                    } catch (Exception ex) {
+                                    }
+
+                                } else {
+
+                                    String a = g.pembulatan(xa);
+                                    String b = g.pembulatan(ya);
+                                    String c = g.pembulatan(za);
+
+                                    cardPure.setValue("X : " + a + "  Y : " + b + "  Z : " + c);
+                                    masukkandata(xa, ya, za);
+
+                                    try {
+                                        Millisecond milis = new Millisecond();
+                                        seriesXA.add(milis, xa);
+                                        seriesYA.add(milis, ya);
+                                        seriesZA.add(milis, za);
+                                    } catch (Exception ex) {
+                                    }
+                                }
                             }
                         } catch (NumberFormatException | JSONException e) {
                         }
@@ -306,26 +336,56 @@ public class FormDashboard extends javax.swing.JPanel {
             serial.closePort();
             cbCom.setEnabled(true);
             btnConnect.setText("Connect");
+
         }
     }//GEN-LAST:event_btnConnectActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-//        Millisecond mili = new Millisecond();
-//        series1.add(mili, 25);
-//        dataset.addSeries(series1);
-//
-//        series2.add(mili, 15);
-//        dataset.addSeries(series2);
-//
-//        series3.add(mili, 2);
-//        dataset.addSeries(series3);
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void btnCalibrasiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCalibrasiActionPerformed
+        statusKalibrasi = true;
+
+        double nilaiX = Collections.max(wadah_xa);
+        double nilaiY = Collections.max(wadah_ya);
+        double nilaiZ = Collections.max(wadah_za);
+
+        // menentukan nilai acuan
+        if (nilaiX > 0) {
+            nilaiAcuanX = nilaiX;
+            tandaBacaX = "-";
+        } else {
+            nilaiX = Collections.min(wadah_xa);
+            nilaiAcuanX = Math.abs(nilaiX);
+            tandaBacaX = "+";
+        }
+
+        if (nilaiY > 0) {
+            nilaiAcuanY = nilaiY;
+            tandaBacaY = "-";
+        } else {
+            nilaiY = Collections.min(wadah_ya);
+            nilaiAcuanY = Math.abs(nilaiY);
+            tandaBacaY = "+";
+        }
+
+        if (nilaiZ > 0) {
+            nilaiAcuanZ = nilaiZ;
+            tandaBacaZ = "-";
+        } else {
+            nilaiZ = Collections.min(wadah_za);
+            nilaiAcuanZ = Math.abs(nilaiZ);
+            tandaBacaZ = "+";
+        }
+
+        btnCalibrasi.setEnabled(false);
+    }//GEN-LAST:event_btnCalibrasiActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel batas;
     private javax.swing.JPanel batasAtas;
+    private javax.swing.JButton btnAnalisis;
+    private javax.swing.JButton btnCalibrasi;
     private javax.swing.JButton btnConnect;
+    private javax.swing.JButton btnSave;
     private component.Card cardAlarm;
     private component.Card cardAverage;
     private component.Card cardMax;
@@ -333,7 +393,6 @@ public class FormDashboard extends javax.swing.JPanel {
     private component.Card cardPure;
     private component.Card cardRMS;
     private javax.swing.JComboBox<String> cbCom;
-    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel lineAtas;
     private javax.swing.JPanel lineTengah;
@@ -346,18 +405,6 @@ public class FormDashboard extends javax.swing.JPanel {
     private javax.swing.JPanel panelLineZ;
     // End of variables declaration//GEN-END:variables
 
-    private void tambahDataFinal(double a, double b, double c) {
-//        Millisecond mili = new Millisecond();
-//        series1.add(mili, a);
-//        dataset.addSeries(series1);
-//
-//        series2.add(mili, b);
-//        dataset.addSeries(series2);
-//
-//        series3.add(mili, c);
-//        dataset.addSeries(series3);
-    }
-
     private void resetNilaiXYZ() {
         wadah_xa.clear();
         wadah_ya.clear();
@@ -365,31 +412,35 @@ public class FormDashboard extends javax.swing.JPanel {
     }
 
     private void masukkandata(double x, double y, double z) {
+        wadah_xa.add(x);
+        wadah_ya.add(y);
+        wadah_za.add(z);
+
         if (wadah_xa.size() > 93) {
             double jml_xa = 0;
             double jml_ya = 0;
             double jml_za = 0;
             try {
 
-                double rata_xa = 0;
-                double rata_ya = 0;
-                double rata_za = 0;
-
                 for (int i = 0; i < wadah_xa.size(); i++) {
                     jml_xa += wadah_xa.get(i);
                     jml_ya += wadah_ya.get(i);
                     jml_za += wadah_za.get(i);
                 }
-                rata_xa = jml_xa / 94;
-                rata_ya = jml_ya / 94;
-                rata_za = jml_za / 94;
 
-                String a = g.pembulatan(jml_xa);
-                String b = g.pembulatan(jml_ya);
-                String c = g.pembulatan(jml_za);
+                double RMS_X = Math.sqrt(jml_xa / 94);
+                double RMS_Y = Math.sqrt(jml_ya / 94);
+                double RMS_Z = Math.sqrt(jml_za / 94);
+                String a = g.pembulatan(RMS_X);
+                String b = g.pembulatan(RMS_Y);
+                String c = g.pembulatan(RMS_Z);
                 cardRMS.setValue("X : " + a + "  Y : " + b + "  Z : " + c);
 
                 // menghitung rata2
+                double rata_xa = jml_xa / 94;
+                double rata_ya = jml_ya / 94;
+                double rata_za = jml_za / 94;
+
                 a = g.pembulatan(rata_xa);
                 b = g.pembulatan(rata_ya);
                 c = g.pembulatan(rata_za);
@@ -424,164 +475,60 @@ public class FormDashboard extends javax.swing.JPanel {
             jml_za = 0;
         }
 
-        wadah_xa.add(x);
-        wadah_ya.add(y);
-        wadah_za.add(z);
-
     }
 
-    private JFreeChart createChartX(final XYDataset dataset) {
-        JFreeChart result = ChartFactory.createTimeSeriesChart(
-                "X Axis",
-                "Time",
-                "Value",
-                dataset,
-                true,
-                true,
-                false
-        );
-        XYPlot plot = result.getXYPlot();
-        DateAxis dateAxis = new DateAxis();
-        dateAxis.setDateFormatOverride(new SimpleDateFormat("HH:m:ss"));
-        plot.setDomainAxis(dateAxis);
-
-        ValueAxis axis = plot.getDomainAxis();
-        axis.setAutoRange(true);
-        axis.setFixedAutoRange(40000.0);  // 60 seconds
-//        axis = plot.getRangeAxis();
-//        axis.setRange(-20.0, 20.0);
-        return result;
+    private XYDataset createDatasetXA() {
+        datasetXA.addSeries(seriesXA);
+        return datasetXA;
     }
 
-    private JFreeChart createChartY(final XYDataset dataset) {
-        JFreeChart result = ChartFactory.createTimeSeriesChart(
-                "Y Axis",
-                "Time",
-                "Value",
-                dataset,
-                true,
-                true,
-                false
-        );
-        XYPlot plot = result.getXYPlot();
-
-        DateAxis dateAxis = new DateAxis();
-        dateAxis.setDateFormatOverride(new SimpleDateFormat("HH:m:ss"));
-        plot.setDomainAxis(dateAxis);
-
-        ValueAxis axis = plot.getDomainAxis();
-        axis.setAutoRange(true);
-        axis.setFixedAutoRange(40000.0);  // 60 seconds
-//        axis = plot.getRangeAxis();
-//        axis.setRange(-20.0, 20.0);
-        return result;
+    private XYDataset createDatasetYA() {
+        datasetYA.addSeries(seriesYA);
+        return datasetYA;
     }
 
-    private JFreeChart createChartZ(final XYDataset dataset) {
-        JFreeChart result = ChartFactory.createTimeSeriesChart(
-                "Z Axis",
-                "Time",
-                "Value",
-                dataset,
-                true,
-                true,
-                false
-        );
-        XYPlot plot = result.getXYPlot();
-        DateAxis dateAxis = new DateAxis();
-        dateAxis.setDateFormatOverride(new SimpleDateFormat("HH:m:ss"));
-        plot.setDomainAxis(dateAxis);
-
-        ValueAxis axis = plot.getDomainAxis();
-        axis.setAutoRange(true);
-        axis.setFixedAutoRange(40000.0);  // 60 seconds
-//        axis = plot.getRangeAxis();
-//        axis.setRange(-20.0, 20.0);
-        return result;
+    private XYDataset createDatasetZA() {
+        datasetZA.addSeries(seriesZA);
+        return datasetZA;
     }
 
-    private JFreeChart createChartFinal(final XYDataset dataset) {
-        JFreeChart result = ChartFactory.createTimeSeriesChart(
-                "XYZ Axis",
-                "Time",
-                "Value",
-                dataset,
-                true,
-                true,
-                false
-        );
-        XYPlot plot = result.getXYPlot();
-        DateAxis dateAxis = new DateAxis();
-        dateAxis.setDateFormatOverride(new SimpleDateFormat("HH:m:ss"));
-        plot.setDomainAxis(dateAxis);
-
-        ValueAxis axis = plot.getDomainAxis();
-        axis.setAutoRange(true);
-        axis.setFixedAutoRange(40000.0);  // 60 seconds
-//        axis = plot.getRangeAxis();
-//        axis.setRange(-20.0, 20.0);
-        return result;
-    }
-
-    
-
-    private JFreeChart createChart(final XYDataset dataset) {
-
-        final JFreeChart chart = ChartFactory.createTimeSeriesChart(
-                "XYZ Axis",
-                "Time", "Value",
-                dataset,
-                true,
-                true,
-                false
-        );
+    private JFreeChart createChart(final XYDataset dataset, String judul, String judulX, String judulY) {
+        JFreeChart chart = ChartFactory.createTimeSeriesChart(judul, judulX, judulY, dataset, true, true, false);
 
         chart.setBackgroundPaint(Color.white);
 
         final XYPlot plot = chart.getXYPlot();
         plot.setBackgroundPaint(Color.WHITE);
-        plot.setDomainGridlinePaint(Color.WHITE);
-        plot.setRangeGridlinePaint(Color.WHITE);
+        plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
+        plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
         plot.setDomainCrosshairVisible(true);
         plot.setRangeCrosshairVisible(true);
 
-        final XYItemRenderer renderer = plot.getRenderer();
+        XYItemRenderer renderer = plot.getRenderer();
         if (renderer instanceof StandardXYItemRenderer) {
-            final StandardXYItemRenderer rr = (StandardXYItemRenderer) renderer;
+            StandardXYItemRenderer rr = (StandardXYItemRenderer) renderer;
             rr.setPlotLines(true);
             rr.setShapesFilled(true);
             rr.setItemLabelsVisible(true);
         }
 
-        final DateAxis axis = (DateAxis) plot.getDomainAxis();
+        DateAxis axis = (DateAxis) plot.getDomainAxis();
         axis.setDateFormatOverride(new SimpleDateFormat("HH:m:ss"));
+        axis.setAutoRange(true);
+        axis.setFixedAutoRange(60000.0);
 
         return chart;
-
     }
 
     private XYDataset createDataset() {
+        datasetFinal.addSeries(seriesXA);
+        datasetFinal.addSeries(seriesYA);
+        datasetFinal.addSeries(seriesZA);
 
-        Millisecond m1 = new Millisecond();
-        Millisecond m2 = new Millisecond();
-        
-        
-        s1.add(m1, 181.8);
-        s1.add(m2, 167.3);
-
-        
-        s2.add(m1, 129.6);
-        s2.add(m2, 123.2);
-
-        
-        dataset.addSeries(s1);
-        dataset.addSeries(s2);
-
-        return dataset;
-
+        return datasetFinal;
     }
 
-    private void customizeChart(JFreeChart chart) {   // here we make some customization
+    private void customizeChartFinal(JFreeChart chart) {   // here we make some customization
         XYPlot plot = chart.getXYPlot();
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
 
@@ -591,19 +538,19 @@ public class FormDashboard extends javax.swing.JPanel {
         renderer.setSeriesPaint(2, Color.YELLOW);
 
         // sets thickness for series (using strokes)
-        renderer.setSeriesStroke(0, new BasicStroke(1.0f));
-        renderer.setSeriesStroke(1, new BasicStroke(1.0f));
-        renderer.setSeriesStroke(2, new BasicStroke(1.0f));
+        renderer.setSeriesStroke(0, new BasicStroke(0.0001f));
+        renderer.setSeriesStroke(1, new BasicStroke(0.0001f));
+        renderer.setSeriesStroke(2, new BasicStroke(0.0001f));
 
         // sets paint color for plot outlines
         plot.setOutlinePaint(Color.white);
-        plot.setOutlineStroke(new BasicStroke(0.0f));
+        plot.setOutlineStroke(new BasicStroke(0.0001f));
 
         // sets renderer for lines
         plot.setRenderer(renderer);
 
         // sets plot background
-        plot.setBackgroundPaint(Color.DARK_GRAY);
+        plot.setBackgroundPaint(Color.WHITE);
 
         // sets paint color for the grid lines
         plot.setRangeGridlinesVisible(true);
