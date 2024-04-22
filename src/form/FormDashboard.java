@@ -20,9 +20,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.time.Day;
 import org.jfree.data.time.Millisecond;
-import org.jfree.data.time.Month;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
@@ -52,6 +50,7 @@ public class FormDashboard extends javax.swing.JPanel {
     // untuk final
     TimeSeries s1 = new TimeSeries("X Axis", Millisecond.class);
     TimeSeries s2 = new TimeSeries("Y Axis", Millisecond.class);
+    TimeSeries s3 = new TimeSeries("Z Axis", Millisecond.class);
 
     TimeSeriesCollection dataset = new TimeSeriesCollection();
 
@@ -100,7 +99,6 @@ public class FormDashboard extends javax.swing.JPanel {
         panelLineZ.add(chartPanelZA);
         panelLineZ.setBackground(Color.white);
 
-
         XYDataset datasetFn = createDataset();
         JFreeChart chart = createChart(datasetFn);
         chart.setBackgroundPaint(Color.white);
@@ -133,7 +131,6 @@ public class FormDashboard extends javax.swing.JPanel {
         panelBawah = new javax.swing.JPanel();
         cbCom = new javax.swing.JComboBox<>();
         btnConnect = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(250, 250, 250));
         setLayout(new java.awt.BorderLayout());
@@ -226,14 +223,6 @@ public class FormDashboard extends javax.swing.JPanel {
         });
         panelBawah.add(btnConnect);
 
-        jButton1.setText("Coba");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-        panelBawah.add(jButton1);
-
         add(panelBawah, java.awt.BorderLayout.SOUTH);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -278,10 +267,9 @@ public class FormDashboard extends javax.swing.JPanel {
                                             seriesYA.add(milis, ya);
                                             seriesZA.add(milis, za);
 
-
-
                                             s1.add(milis, xa);
                                             s2.add(milis, ya);
+                                            s3.add(milis, za);
                                         } catch (Exception ex) {
                                         }
 
@@ -309,18 +297,6 @@ public class FormDashboard extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_btnConnectActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-//        Millisecond mili = new Millisecond();
-//        series1.add(mili, 25);
-//        dataset.addSeries(series1);
-//
-//        series2.add(mili, 15);
-//        dataset.addSeries(series2);
-//
-//        series3.add(mili, 2);
-//        dataset.addSeries(series3);
-    }//GEN-LAST:event_jButton1ActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel batas;
@@ -333,7 +309,6 @@ public class FormDashboard extends javax.swing.JPanel {
     private component.Card cardPure;
     private component.Card cardRMS;
     private javax.swing.JComboBox<String> cbCom;
-    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel lineAtas;
     private javax.swing.JPanel lineTengah;
@@ -345,18 +320,6 @@ public class FormDashboard extends javax.swing.JPanel {
     private javax.swing.JPanel panelLineY;
     private javax.swing.JPanel panelLineZ;
     // End of variables declaration//GEN-END:variables
-
-    private void tambahDataFinal(double a, double b, double c) {
-//        Millisecond mili = new Millisecond();
-//        series1.add(mili, a);
-//        dataset.addSeries(series1);
-//
-//        series2.add(mili, b);
-//        dataset.addSeries(series2);
-//
-//        series3.add(mili, c);
-//        dataset.addSeries(series3);
-    }
 
     private void resetNilaiXYZ() {
         wadah_xa.clear();
@@ -523,18 +486,8 @@ public class FormDashboard extends javax.swing.JPanel {
         return result;
     }
 
-    
-
     private JFreeChart createChart(final XYDataset dataset) {
-
-        final JFreeChart chart = ChartFactory.createTimeSeriesChart(
-                "XYZ Axis",
-                "Time", "Value",
-                dataset,
-                true,
-                true,
-                false
-        );
+        final JFreeChart chart = ChartFactory.createTimeSeriesChart("XYZ Axis", "Time", "Value", dataset, true, true, false);
 
         chart.setBackgroundPaint(Color.white);
 
@@ -561,21 +514,9 @@ public class FormDashboard extends javax.swing.JPanel {
     }
 
     private XYDataset createDataset() {
-
-        Millisecond m1 = new Millisecond();
-        Millisecond m2 = new Millisecond();
-        
-        
-        s1.add(m1, 181.8);
-        s1.add(m2, 167.3);
-
-        
-        s2.add(m1, 129.6);
-        s2.add(m2, 123.2);
-
-        
         dataset.addSeries(s1);
         dataset.addSeries(s2);
+        dataset.addSeries(s3);
 
         return dataset;
 
