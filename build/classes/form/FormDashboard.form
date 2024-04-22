@@ -282,6 +282,21 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnConnectActionPerformed"/>
           </Events>
         </Component>
+        <Component class="javax.swing.JButton" name="btnCalibrasi">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Calibrasi"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnSave">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Save"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnAnalisis">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Analisis"/>
+          </Properties>
+        </Component>
       </SubComponents>
     </Container>
   </SubComponents>
