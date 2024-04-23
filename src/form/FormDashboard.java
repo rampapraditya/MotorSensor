@@ -3,11 +3,17 @@ package form;
 import com.fazecast.jSerialComm.SerialPort;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import model.ModelCard;
 import modul.Global;
 import org.jfree.chart.ChartFactory;
@@ -235,6 +241,11 @@ public class FormDashboard extends javax.swing.JPanel {
         panelBawah.add(btnCalibrasi);
 
         btnSave.setText("Save");
+        btnSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSaveActionPerformed(evt);
+            }
+        });
         panelBawah.add(btnSave);
 
         btnAnalisis.setText("Analisis");
@@ -313,7 +324,10 @@ public class FormDashboard extends javax.swing.JPanel {
                                     String b = g.pembulatan(ya);
                                     String c = g.pembulatan(za);
 
-                                    cardPure.setValue("X : " + a + "  Y : " + b + "  Z : " + c);
+                                    cardPure.setValue("X : " + a);
+                                    cardPure.setValue1("Y : " + b);
+                                    cardPure.setValue2("Z : " + c);
+                                    
                                     masukkandata(xa, ya, za);
 
                                     try {
@@ -377,6 +391,31 @@ public class FormDashboard extends javax.swing.JPanel {
 
         btnCalibrasi.setEnabled(false);
     }//GEN-LAST:event_btnCalibrasiActionPerformed
+
+    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+        JFileChooser fileChooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV File", "csv");
+        fileChooser.addChoosableFileFilter(filter);
+        fileChooser.setFileFilter(filter);
+
+        int option = fileChooser.showSaveDialog(null);
+        if (option == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+
+            // proses simpan
+            try {
+                String absolutePath = file.getAbsolutePath();
+                if (!absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("csv")) {
+                    absolutePath += ".csv
+                }
+                FileWriter myWriter = new FileWriter(absolutePath);
+                myWriter.write("ABC");
+                myWriter.close();
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, e.getMessage());
+            }
+        }
+    }//GEN-LAST:event_btnSaveActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

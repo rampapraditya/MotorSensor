@@ -36,38 +36,46 @@ public class Card extends javax.swing.JPanel {
     }
 
     public void setData(ModelCard data) {
-        lbIcon.setIcon(data.getIcon());
+        //lbIcon.setIcon(data.getIcon());
         lbTitle.setText(data.getTitle());
         lbValues.setText(data.getValues());
     }
     
     public void setValue(String nilai) {
-//        SwingUtilities.invokeLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                lbValues.setText(nilai);
-//            }
-//        });
         lbValues.setText(nilai);
+    }
+    
+    public void setValue1(String nilai) {
+        lbValues1.setText(nilai);
+    }
+    public void setValue2(String nilai) {
+        lbValues2.setText(nilai);
     }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        lbIcon = new javax.swing.JLabel();
         lbTitle = new javax.swing.JLabel();
         lbValues = new javax.swing.JLabel();
+        lbValues1 = new javax.swing.JLabel();
+        lbValues2 = new javax.swing.JLabel();
 
-        lbIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/stock.png"))); // NOI18N
-
-        lbTitle.setFont(new java.awt.Font("sansserif", 1, 14)); // NOI18N
+        lbTitle.setFont(new java.awt.Font("sansserif", 1, 16)); // NOI18N
         lbTitle.setForeground(new java.awt.Color(255, 255, 255));
         lbTitle.setText("Title");
 
-        lbValues.setFont(new java.awt.Font("sansserif", 1, 9)); // NOI18N
+        lbValues.setFont(new java.awt.Font("sansserif", 1, 11)); // NOI18N
         lbValues.setForeground(new java.awt.Color(255, 255, 255));
         lbValues.setText("Values");
+
+        lbValues1.setFont(new java.awt.Font("sansserif", 1, 11)); // NOI18N
+        lbValues1.setForeground(new java.awt.Color(255, 255, 255));
+        lbValues1.setText("Values");
+
+        lbValues2.setFont(new java.awt.Font("sansserif", 1, 11)); // NOI18N
+        lbValues2.setForeground(new java.awt.Color(255, 255, 255));
+        lbValues2.setText("Values");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -76,20 +84,23 @@ public class Card extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addGap(25, 25, 25)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lbValues2)
+                    .addComponent(lbValues1)
                     .addComponent(lbValues)
-                    .addComponent(lbTitle)
-                    .addComponent(lbIcon))
+                    .addComponent(lbTitle))
                 .addContainerGap(206, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(25, 25, 25)
-                .addComponent(lbIcon)
-                .addGap(18, 18, 18)
+                .addGap(26, 26, 26)
                 .addComponent(lbTitle)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addComponent(lbValues)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lbValues1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lbValues2)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -108,8 +119,9 @@ public class Card extends javax.swing.JPanel {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel lbIcon;
     private javax.swing.JLabel lbTitle;
     private javax.swing.JLabel lbValues;
+    private javax.swing.JLabel lbValues1;
+    private javax.swing.JLabel lbValues2;
     // End of variables declaration//GEN-END:variables
 }

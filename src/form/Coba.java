@@ -1,14 +1,13 @@
 package form;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.time.Millisecond;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.xy.XYDataset;
+import com.opencsv.CSVWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -16,21 +15,8 @@ import org.jfree.data.xy.XYDataset;
  */
 public class Coba extends javax.swing.JFrame {
 
-    
-    private TimeSeries series;
-    private double lastValue = 100.0;
-    private TimeSeriesCollection dataset;
-    private JFreeChart chart;
-    private ChartPanel chartPanel;
-    
     public Coba() {
         initComponents();
-        series = new TimeSeries("Random Data", Millisecond.class);
-        dataset = new TimeSeriesCollection(series);
-        chart = createChart(dataset);
-        
-        chartPanel = new ChartPanel(chart);
-        jPanel1.add(chartPanel);
     }
 
     /**
@@ -42,23 +28,11 @@ public class Coba extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        txtNama = new javax.swing.JTextField();
-        txtJumlah = new javax.swing.JTextField();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Contoh"));
-        jPanel1.setLayout(new java.awt.BorderLayout());
-
-        jLabel1.setText("Produk");
-
-        jLabel2.setText("Jumlah");
-
-        jButton1.setText("Proses");
+        jButton1.setText("jButton1");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -71,98 +45,40 @@ public class Coba extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel2))
-                        .addGap(29, 29, 29)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton1)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(txtNama)
-                                .addComponent(txtJumlah, javax.swing.GroupLayout.DEFAULT_SIZE, 147, Short.MAX_VALUE)))
-                        .addGap(0, 288, Short.MAX_VALUE)))
-                .addContainerGap())
+                .addComponent(jButton1)
+                .addContainerGap(437, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtNama, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtJumlah, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
-                .addContainerGap())
+                .addContainerGap(282, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-//        String nama = txtNama.getText();
-//        float jumlah = Float.parseFloat(txtJumlah.getText());
-//        updateData(nama, jumlah);
-        
-        final double factor = 0.90 + 0.2 * Math.random();
-        this.lastValue = this.lastValue * factor;
-        final Millisecond now = new Millisecond();
-        System.out.println("Now = " + now.toString());
-        this.series.add(new Millisecond(), this.lastValue);
+        try (CSVWriter writer = new CSVWriter(new FileWriter("d:\\test.csv"))) {
+            List<String[]> csvData = createCsvDataSimple();
+            writer.writeAll(csvData);
+        } catch (IOException ex) {
+            Logger.getLogger(Coba.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void updateData(String nama, float jumlah){
-//        dataHash.clear();
-//        dataHash.put(nama, jumlah);
-//        updateChart();
-    }
-    
-//    private void updateChart(){
-//        DefaultCategoryDataset dod = new DefaultCategoryDataset();
-//        Set keys = dataHash.keySet();
-//        Iterator prodInfo = keys.iterator();
-//        
-//        while (prodInfo.hasNext()) {
-//            String name = prodInfo.next().toString();
-//            float nilai = (float)dataHash.get(name);
-//            dod.setValue(nilai, "Sales", name);
-//        }
-//        
-//        JFreeChart jChart = ChartFactory.createBarChart("Sales Report", "Produk Name", "Total", dod, PlotOrientation.VERTICAL, true, true, true);
-//        CategoryPlot plot = jChart.getCategoryPlot();
-//        plot.setRangeGridlinePaint(Color.BLACK);
-//        
-//        ChartPanel chartPnl = new ChartPanel(jChart);
-//        jPanel1.removeAll();
-//        jPanel1.add(chartPnl);
-//        jPanel1.updateUI();
-//    }
-    
-    private JFreeChart createChart(final XYDataset dataset) {
-        final JFreeChart result = ChartFactory.createTimeSeriesChart(
-            "Dynamic Data Demo", 
-            "Time", 
-            "Value",
-            dataset, 
-            true, 
-            true, 
-            false
-        );
-        final XYPlot plot = result.getXYPlot();
-        ValueAxis axis = plot.getDomainAxis();
-        axis.setAutoRange(true);
-        axis.setFixedAutoRange(60000.0);  // 60 seconds
-        axis = plot.getRangeAxis();
-        axis.setRange(0.0, 200.0); 
-        return result;
+    private List<String[]> createCsvDataSimple() {
+        String[] header = {"id", "name", "address", "phone"};
+        String[] record1 = {"1", "first name", "address 1", "11111"};
+        String[] record2 = {"2", "second name", "address 2", "22222"};
+
+        List<String[]> list = new ArrayList<>();
+        list.add(header);
+        list.add(record1);
+        list.add(record2);
+
+        return list;
     }
     /**
      * @param args the command line arguments
@@ -201,10 +117,5 @@ public class Coba extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JTextField txtJumlah;
-    private javax.swing.JTextField txtNama;
     // End of variables declaration//GEN-END:variables
 }

@@ -4,6 +4,23 @@ import javax.swing.Icon;
 
 public class ModelCard {
 
+    public ModelCard() {
+    }
+    
+    public ModelCard(Icon icon, String title, String values, String description) {
+        this.icon = icon;
+        this.title = title;
+        this.values = values;
+        this.description = description;
+    }
+
+    private Icon icon;
+    private String title;
+    private String values;
+    private String values1;
+    private String values2;
+    private String description;
+    
     public Icon getIcon() {
         return icon;
     }
@@ -28,6 +45,24 @@ public class ModelCard {
         this.values = values;
     }
 
+    public String getValues1() {
+        return values1;
+    }
+
+    public void setValues1(String values1) {
+        this.values1 = values1;
+    }
+
+    public String getValues2() {
+        return values2;
+    }
+
+    public void setValues2(String values2) {
+        this.values2 = values2;
+    }
+
+    
+    
     public String getDescription() {
         return description;
     }
@@ -35,19 +70,4 @@ public class ModelCard {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    public ModelCard(Icon icon, String title, String values, String description) {
-        this.icon = icon;
-        this.title = title;
-        this.values = values;
-        this.description = description;
-    }
-
-    public ModelCard() {
-    }
-
-    private Icon icon;
-    private String title;
-    private String values;
-    private String description;
 }
