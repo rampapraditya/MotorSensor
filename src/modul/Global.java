@@ -429,6 +429,12 @@ public class Global {
         return formatTgl;
     }
     
+    public String curTime(Date tanggal){
+        SimpleDateFormat Format = new SimpleDateFormat("HH:m:ss");
+        String formatTgl = Format.format(tanggal);
+        return formatTgl;
+    }
+    
     public Date StringToDate(String input) throws Exception{
         DateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
         Date date = (Date)formater.parse(input);

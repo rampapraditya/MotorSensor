@@ -1,7 +1,7 @@
 package form;
 
 import com.fazecast.jSerialComm.SerialPort;
-import java.awt.BasicStroke;
+import com.opencsv.CSVWriter;
 import java.awt.Color;
 import java.io.File;
 import java.io.FileWriter;
@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
@@ -23,7 +25,6 @@ import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -39,6 +40,7 @@ public class FormDashboard extends javax.swing.JPanel {
     private final String hasil = "";
     private final Global g = new Global();
 
+    private final ArrayList<String> wadah_waktu = new ArrayList<>();
     private final ArrayList<Double> wadah_xa = new ArrayList<>();
     private final ArrayList<Double> wadah_ya = new ArrayList<>();
     private final ArrayList<Double> wadah_za = new ArrayList<>();
@@ -71,12 +73,12 @@ public class FormDashboard extends javax.swing.JPanel {
 
         resetNilaiXYZ();
 
-        cardPure.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "Value", "X : 0  Y : 0  Z : 0", ""));
-        cardRMS.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "RMS", "X : 0  Y : 0  Z : 0", ""));
-        cardAverage.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "Average", "0", ""));
-        cardMax.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "Max", "0", ""));
-        cardMin.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "Min", "0", ""));
-        cardAlarm.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "Alarm", "0", ""));
+        cardPure.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "Value", "0", "0", "0", ""));
+        cardRMS.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "RMS", "0", "0", "0", ""));
+        cardAverage.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "Average", "0", "0", "0", ""));
+        cardMax.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "Max", "0", "0", "0", ""));
+        cardMin.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "Min", "0", "0", "0", ""));
+        cardAlarm.setData(new ModelCard(new ImageIcon(getClass().getResource("/icon/stock.png")), "Alarm", "0", "0", "0", ""));
 
         cbCom.removeAllItems();
         SerialPort[] portnames = SerialPort.getCommPorts();
@@ -85,28 +87,28 @@ public class FormDashboard extends javax.swing.JPanel {
         }
 
         XYDataset datasetTempXA = createDatasetXA();
-        JFreeChart chartXA = createChart(datasetTempXA, "X Axis", "Time", "Value");
+        JFreeChart chartXA = createChart(datasetTempXA, "X Axis", "Time", "Acceleration", 0);
         chartXA.setBackgroundPaint(Color.white);
         ChartPanel chartPanelXA = new ChartPanel(chartXA);
         panelLineX.add(chartPanelXA);
         panelLineX.setBackground(Color.white);
 
         XYDataset datasetTempYA = createDatasetYA();
-        JFreeChart chartYA = createChart(datasetTempYA, "Y Axis", "Time", "Value");
+        JFreeChart chartYA = createChart(datasetTempYA, "Y Axis", "Time", "Acceleration", 1);
         chartYA.setBackgroundPaint(Color.white);
         ChartPanel chartPanelYA = new ChartPanel(chartYA);
         panelLineY.add(chartPanelYA);
         panelLineY.setBackground(Color.white);
 
         XYDataset datasetTempZA = createDatasetZA();
-        JFreeChart chartZA = createChart(datasetTempZA, "Z Axis", "Time", "Value");
+        JFreeChart chartZA = createChart(datasetTempZA, "Z Axis", "Time", "Acceleration", 2);
         chartZA.setBackgroundPaint(Color.white);
         ChartPanel chartPanelZA = new ChartPanel(chartZA);
         panelLineZ.add(chartPanelZA);
         panelLineZ.setBackground(Color.white);
 
         XYDataset datasetFn = createDataset();
-        JFreeChart chart = createChart(datasetFn, "XYZ Axis", "Time", "Value");
+        JFreeChart chart = createChart(datasetFn, "XYZ Axis", "Time", "Acceleration", 3);
         chart.setBackgroundPaint(Color.white);
         ChartPanel chartPanel = new ChartPanel(chart);
         panelGrafikTengah.add(chartPanel);
@@ -273,76 +275,80 @@ public class FormDashboard extends javax.swing.JPanel {
 
                 @Override
                 public void run() {
-                    Scanner scanner = new Scanner(serial.getInputStream());
-                    while (scanner.hasNextLine()) {
-                        try {
-                            String line = scanner.nextLine();
-                            if (line.startsWith("{") && line.endsWith("}")) {
-                                JSONObject obj = new JSONObject(line);
-                                double xa = Double.parseDouble(obj.get("xa").toString());
-                                double ya = Double.parseDouble(obj.get("ya").toString());
-                                double za = Double.parseDouble(obj.get("za").toString());
-
-                                if (statusKalibrasi) {
-                                    if (tandaBacaX.equals("+")) {
-                                        xa += nilaiAcuanX;
-                                    } else {
-                                        xa -= nilaiAcuanX;
-                                    }
-
-                                    if (tandaBacaY.equals("+")) {
-                                        ya += nilaiAcuanY;
-                                    } else {
-                                        ya -= nilaiAcuanY;
-                                    }
-
-                                    if (tandaBacaZ.equals("+")) {
-                                        za += nilaiAcuanZ;
-                                    } else {
-                                        za -= nilaiAcuanZ;
-                                    }
-
-                                    String a = g.pembulatan(xa);
-                                    String b = g.pembulatan(ya);
-                                    String c = g.pembulatan(za);
-
-                                    cardPure.setValue("X : " + a + "  Y : " + b + "  Z : " + c);
-
-                                    masukkandata(xa, ya, za);
-
-                                    try {
-                                        Millisecond milis = new Millisecond();
-                                        seriesXA.add(milis, xa);
-                                        seriesYA.add(milis, ya);
-                                        seriesZA.add(milis, za);
-                                    } catch (Exception ex) {
-                                    }
-
-                                } else {
-
-                                    String a = g.pembulatan(xa);
-                                    String b = g.pembulatan(ya);
-                                    String c = g.pembulatan(za);
-
-                                    cardPure.setValue("X : " + a);
-                                    cardPure.setValue1("Y : " + b);
-                                    cardPure.setValue2("Z : " + c);
+                    try (Scanner scanner = new Scanner(serial.getInputStream())) {
+                        while (scanner.hasNextLine()) {
+                            try {
+                                String line = scanner.nextLine();
+                                if (line.startsWith("{") && line.endsWith("}")) {
+                                    JSONObject obj = new JSONObject(line);
+                                    double xa = Double.parseDouble(obj.get("xa").toString());
+                                    double ya = Double.parseDouble(obj.get("ya").toString());
+                                    double za = Double.parseDouble(obj.get("za").toString());
+                                    String waktu = g.curTime(new Date());
                                     
-                                    masukkandata(xa, ya, za);
+                                    if (statusKalibrasi) {
+                                        if (tandaBacaX.equals("+")) {
+                                            xa += nilaiAcuanX;
+                                        } else {
+                                            xa -= nilaiAcuanX;
+                                        }
+                                        
+                                        if (tandaBacaY.equals("+")) {
+                                            ya += nilaiAcuanY;
+                                        } else {
+                                            ya -= nilaiAcuanY;
+                                        }
+                                        
+                                        if (tandaBacaZ.equals("+")) {
+                                            za += nilaiAcuanZ;
+                                        } else {
+                                            za -= nilaiAcuanZ;
+                                        }
+                                        
+                                        String a = g.pembulatan(xa);
+                                        String b = g.pembulatan(ya);
+                                        String c = g.pembulatan(za);
+                                        
+                                        cardPure.setValue("X : " + a);
+                                        cardPure.setValue1("Y : " + b);
+                                        cardPure.setValue2("Z : " + c);
+                                        
+                                        
+                                        masukkandata(waktu, xa, ya, za);
+                                        
+                                        try {
+                                            Millisecond milis = new Millisecond();
+                                            seriesXA.add(milis, xa);
+                                            seriesYA.add(milis, ya);
+                                            seriesZA.add(milis, za);
+                                        } catch (Exception ex) {
+                                        }
+                                        
+                                    } else {
 
-                                    try {
-                                        Millisecond milis = new Millisecond();
-                                        seriesXA.add(milis, xa);
-                                        seriesYA.add(milis, ya);
-                                        seriesZA.add(milis, za);
-                                    } catch (Exception ex) {
+                                        String a = g.pembulatan(xa);
+                                        String b = g.pembulatan(ya);
+                                        String c = g.pembulatan(za);
+                                        
+                                        cardPure.setValue("X : " + a);
+                                        cardPure.setValue1("Y : " + b);
+                                        cardPure.setValue2("Z : " + c);
+                                        
+                                        masukkandata(waktu, xa, ya, za);
+                                        
+                                        try {
+                                            Millisecond milis = new Millisecond();
+                                            seriesXA.add(milis, xa);
+                                            seriesYA.add(milis, ya);
+                                            seriesZA.add(milis, za);
+                                        } catch (Exception ex) {
+                                        }
                                     }
                                 }
+                            } catch (NumberFormatException | JSONException e) {
                             }
-                        } catch (NumberFormatException | JSONException e) {
                         }
                     }
-                    scanner.close();
                 }
             };
             thread.start();
@@ -406,17 +412,37 @@ public class FormDashboard extends javax.swing.JPanel {
             try {
                 String absolutePath = file.getAbsolutePath();
                 if (!absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("csv")) {
-                    absolutePath += ".csv
+                    absolutePath += ".csv";
                 }
-                FileWriter myWriter = new FileWriter(absolutePath);
-                myWriter.write("ABC");
-                myWriter.close();
+                try (FileWriter myWriter = new FileWriter(absolutePath); CSVWriter writer = new CSVWriter(myWriter)) {
+                    List<String[]> csvData = createCsvDataSimple();
+                    writer.writeAll(csvData);
+                    writer.close();
+                    
+                    JOptionPane.showMessageDialog(null, "Data tersimpan", "Info", JOptionPane.INFORMATION_MESSAGE);
+                }
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(null, e.getMessage());
             }
         }
     }//GEN-LAST:event_btnSaveActionPerformed
 
+    
+    private List<String[]> createCsvDataSimple() {
+        String[] header = {"TIME", "X", "Y", "Z"};
+        
+        List<String[]> list = new ArrayList<>();
+        list.add(header);
+        
+        for (int i = 0; i < wadah_xa.size(); i++) {
+            String[] record1 = {wadah_waktu.get(i), 
+                wadah_xa.get(i).toString(), 
+                wadah_ya.get(i).toString(), 
+                wadah_za.get(i).toString()};
+            list.add(record1);
+        }
+        return list;
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel batas;
@@ -450,7 +476,8 @@ public class FormDashboard extends javax.swing.JPanel {
         wadah_za.clear();
     }
 
-    private void masukkandata(double x, double y, double z) {
+    private void masukkandata(String waktu, double x, double y, double z) {
+        wadah_waktu.add(waktu);
         wadah_xa.add(x);
         wadah_ya.add(y);
         wadah_za.add(z);
@@ -466,42 +493,65 @@ public class FormDashboard extends javax.swing.JPanel {
                     jml_ya += wadah_ya.get(i);
                     jml_za += wadah_za.get(i);
                 }
-
+                
                 double RMS_X = Math.sqrt(jml_xa / 94);
                 double RMS_Y = Math.sqrt(jml_ya / 94);
                 double RMS_Z = Math.sqrt(jml_za / 94);
+                
                 String a = g.pembulatan(RMS_X);
                 String b = g.pembulatan(RMS_Y);
                 String c = g.pembulatan(RMS_Z);
-                cardRMS.setValue("X : " + a + "  Y : " + b + "  Z : " + c);
+                if(a.equals("NaN")){
+                    cardRMS.setValue("X : 0");
+                }else{
+                    cardRMS.setValue("X : " + a);
+                }
+                
+                if(b.equals("NaN")){
+                    cardRMS.setValue1("Y : 0");
+                }else{
+                    cardRMS.setValue1("Y : " + b);
+                }
+                
+                if(c.equals("NaN")){
+                    cardRMS.setValue2("Z : 0");
+                }else{
+                    cardRMS.setValue2("Z : " + c);
+                }
 
                 // menghitung rata2
                 double rata_xa = jml_xa / 94;
                 double rata_ya = jml_ya / 94;
                 double rata_za = jml_za / 94;
 
-                a = g.pembulatan(rata_xa);
-                b = g.pembulatan(rata_ya);
-                c = g.pembulatan(rata_za);
-                cardAverage.setValue("X : " + a + "  Y : " + b + "  Z : " + c);
+                String aa = g.pembulatan(rata_xa);
+                String bb = g.pembulatan(rata_ya);
+                String cc = g.pembulatan(rata_za);
+                cardAverage.setValue("X : " + aa);
+                cardAverage.setValue1("Y : " + bb);
+                cardAverage.setValue2("Z : " + cc);
 
                 // mencari maximal
                 double max_x = Collections.max(wadah_xa);
                 double max_y = Collections.max(wadah_ya);
                 double max_z = Collections.max(wadah_za);
-                a = g.pembulatan(max_x);
-                b = g.pembulatan(max_y);
-                c = g.pembulatan(max_z);
-                cardMax.setValue("X : " + a + "  Y : " + b + "  Z : " + c);
+                aa = g.pembulatan(max_x);
+                bb = g.pembulatan(max_y);
+                cc = g.pembulatan(max_z);
+                cardMax.setValue("X : " + aa);
+                cardMax.setValue1("Y : " + bb);
+                cardMax.setValue2("Z : " + cc);
 
                 // mencari minimal
                 double min_x = Collections.min(wadah_xa);
                 double min_y = Collections.min(wadah_ya);
                 double min_z = Collections.min(wadah_za);
-                a = g.pembulatan(min_x);
-                b = g.pembulatan(min_y);
-                c = g.pembulatan(min_z);
-                cardMin.setValue("X : " + a + "  Y : " + b + "  Z : " + c);
+                aa = g.pembulatan(min_x);
+                bb = g.pembulatan(min_y);
+                cc = g.pembulatan(min_z);
+                cardMin.setValue("X : " + aa);
+                cardMin.setValue1("Y : " + bb);
+                cardMin.setValue2("Z : " + cc);
 
             } catch (NumberFormatException e) {
                 jml_xa = 0;
@@ -531,7 +581,7 @@ public class FormDashboard extends javax.swing.JPanel {
         return datasetZA;
     }
 
-    private JFreeChart createChart(final XYDataset dataset, String judul, String judulX, String judulY) {
+    private JFreeChart createChart(final XYDataset dataset, String judul, String judulX, String judulY, int pilAxis) {
         JFreeChart chart = ChartFactory.createTimeSeriesChart(judul, judulX, judulY, dataset, true, true, false);
 
         chart.setBackgroundPaint(Color.white);
@@ -544,6 +594,17 @@ public class FormDashboard extends javax.swing.JPanel {
         plot.setRangeCrosshairVisible(true);
 
         XYItemRenderer renderer = plot.getRenderer();
+        switch (pilAxis) {
+            case 0:
+                renderer.setSeriesPaint(0, Color.RED);
+                break;
+            case 1:
+                renderer.setSeriesPaint(0, Color.BLUE);
+                break;
+            case 2:
+                renderer.setSeriesPaint(0, Color.GREEN);
+                break;
+        }
         if (renderer instanceof StandardXYItemRenderer) {
             StandardXYItemRenderer rr = (StandardXYItemRenderer) renderer;
             rr.setPlotLines(true);
@@ -565,37 +626,5 @@ public class FormDashboard extends javax.swing.JPanel {
         datasetFinal.addSeries(seriesZA);
 
         return datasetFinal;
-    }
-
-    private void customizeChartFinal(JFreeChart chart) {   // here we make some customization
-        XYPlot plot = chart.getXYPlot();
-        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-
-        // sets paint color for each series
-        renderer.setSeriesPaint(0, Color.RED);
-        renderer.setSeriesPaint(1, Color.GREEN);
-        renderer.setSeriesPaint(2, Color.YELLOW);
-
-        // sets thickness for series (using strokes)
-        renderer.setSeriesStroke(0, new BasicStroke(0.0001f));
-        renderer.setSeriesStroke(1, new BasicStroke(0.0001f));
-        renderer.setSeriesStroke(2, new BasicStroke(0.0001f));
-
-        // sets paint color for plot outlines
-        plot.setOutlinePaint(Color.white);
-        plot.setOutlineStroke(new BasicStroke(0.0001f));
-
-        // sets renderer for lines
-        plot.setRenderer(renderer);
-
-        // sets plot background
-        plot.setBackgroundPaint(Color.WHITE);
-
-        // sets paint color for the grid lines
-        plot.setRangeGridlinesVisible(true);
-        plot.setRangeGridlinePaint(Color.BLACK);
-
-        plot.setDomainGridlinesVisible(true);
-        plot.setDomainGridlinePaint(Color.BLACK);
     }
 }

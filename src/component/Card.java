@@ -39,6 +39,8 @@ public class Card extends javax.swing.JPanel {
         //lbIcon.setIcon(data.getIcon());
         lbTitle.setText(data.getTitle());
         lbValues.setText(data.getValues());
+        lbValues1.setText(data.getValues1());
+        lbValues2.setText(data.getValues2());
     }
     
     public void setValue(String nilai) {
