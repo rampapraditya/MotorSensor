@@ -40,7 +40,11 @@ public class FormDashboard extends javax.swing.JPanel {
     private final String hasil = "";
     private final Global g = new Global();
 
-    private final ArrayList<String> wadah_waktu = new ArrayList<>();
+    private final ArrayList<String> wadah_waktuFull = new ArrayList<>();
+    private final ArrayList<Double> wadah_xaFull = new ArrayList<>();
+    private final ArrayList<Double> wadah_yaFull = new ArrayList<>();
+    private final ArrayList<Double> wadah_zaFull = new ArrayList<>();
+    
     private final ArrayList<Double> wadah_xa = new ArrayList<>();
     private final ArrayList<Double> wadah_ya = new ArrayList<>();
     private final ArrayList<Double> wadah_za = new ArrayList<>();
@@ -417,8 +421,6 @@ public class FormDashboard extends javax.swing.JPanel {
                 try (FileWriter myWriter = new FileWriter(absolutePath); CSVWriter writer = new CSVWriter(myWriter)) {
                     List<String[]> csvData = createCsvDataSimple();
                     writer.writeAll(csvData);
-                    writer.close();
-                    
                     JOptionPane.showMessageDialog(null, "Data tersimpan", "Info", JOptionPane.INFORMATION_MESSAGE);
                 }
             } catch (IOException e) {
@@ -434,11 +436,11 @@ public class FormDashboard extends javax.swing.JPanel {
         List<String[]> list = new ArrayList<>();
         list.add(header);
         
-        for (int i = 0; i < wadah_xa.size(); i++) {
-            String[] record1 = {wadah_waktu.get(i), 
-                wadah_xa.get(i).toString(), 
-                wadah_ya.get(i).toString(), 
-                wadah_za.get(i).toString()};
+        for (int i = 0; i < wadah_waktuFull.size(); i++) {
+            String[] record1 = {wadah_waktuFull.get(i), 
+                wadah_xaFull.get(i).toString(), 
+                wadah_yaFull.get(i).toString(), 
+                wadah_zaFull.get(i).toString()};
             list.add(record1);
         }
         return list;
@@ -477,7 +479,11 @@ public class FormDashboard extends javax.swing.JPanel {
     }
 
     private void masukkandata(String waktu, double x, double y, double z) {
-        wadah_waktu.add(waktu);
+        wadah_waktuFull.add(waktu);
+        wadah_xaFull.add(x);
+        wadah_yaFull.add(y);
+        wadah_zaFull.add(z);
+        
         wadah_xa.add(x);
         wadah_ya.add(y);
         wadah_za.add(z);
