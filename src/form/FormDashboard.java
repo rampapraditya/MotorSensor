@@ -144,8 +144,8 @@ public class FormDashboard extends javax.swing.JPanel {
         cbCom = new javax.swing.JComboBox<>();
         btnConnect = new javax.swing.JButton();
         btnCalibrasi = new javax.swing.JButton();
-        btnSave = new javax.swing.JButton();
-        btnAnalisis = new javax.swing.JButton();
+        btnSaveXYZ = new javax.swing.JButton();
+        btnSaveSumary = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(250, 250, 250));
         setLayout(new java.awt.BorderLayout());
@@ -246,16 +246,21 @@ public class FormDashboard extends javax.swing.JPanel {
         });
         panelBawah.add(btnCalibrasi);
 
-        btnSave.setText("Save");
-        btnSave.addActionListener(new java.awt.event.ActionListener() {
+        btnSaveXYZ.setText("Save XYZ");
+        btnSaveXYZ.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSaveActionPerformed(evt);
+                btnSaveXYZActionPerformed(evt);
             }
         });
-        panelBawah.add(btnSave);
+        panelBawah.add(btnSaveXYZ);
 
-        btnAnalisis.setText("Analisis");
-        panelBawah.add(btnAnalisis);
+        btnSaveSumary.setText("Save Summary");
+        btnSaveSumary.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSaveSumaryActionPerformed(evt);
+            }
+        });
+        panelBawah.add(btnSaveSumary);
 
         add(panelBawah, java.awt.BorderLayout.SOUTH);
     }// </editor-fold>//GEN-END:initComponents
@@ -402,7 +407,7 @@ public class FormDashboard extends javax.swing.JPanel {
         btnCalibrasi.setEnabled(false);
     }//GEN-LAST:event_btnCalibrasiActionPerformed
 
-    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+    private void btnSaveXYZActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveXYZActionPerformed
         JFileChooser fileChooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV File", "csv");
         fileChooser.addChoosableFileFilter(filter);
@@ -419,7 +424,7 @@ public class FormDashboard extends javax.swing.JPanel {
                     absolutePath += ".csv";
                 }
                 try (FileWriter myWriter = new FileWriter(absolutePath); CSVWriter writer = new CSVWriter(myWriter)) {
-                    List<String[]> csvData = createCsvDataSimple();
+                    List<String[]> csvData = createCsvDataXYZ();
                     writer.writeAll(csvData);
                     JOptionPane.showMessageDialog(null, "Data tersimpan", "Info", JOptionPane.INFORMATION_MESSAGE);
                 }
@@ -427,10 +432,37 @@ public class FormDashboard extends javax.swing.JPanel {
                 JOptionPane.showMessageDialog(null, e.getMessage());
             }
         }
-    }//GEN-LAST:event_btnSaveActionPerformed
+    }//GEN-LAST:event_btnSaveXYZActionPerformed
+
+    private void btnSaveSumaryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveSumaryActionPerformed
+        JFileChooser fileChooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV File", "csv");
+        fileChooser.addChoosableFileFilter(filter);
+        fileChooser.setFileFilter(filter);
+
+        int option = fileChooser.showSaveDialog(null);
+        if (option == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+
+            // proses simpan
+            try {
+                String absolutePath = file.getAbsolutePath();
+                if (!absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("csv")) {
+                    absolutePath += ".csv";
+                }
+                try (FileWriter myWriter = new FileWriter(absolutePath); CSVWriter writer = new CSVWriter(myWriter)) {
+                    List<String[]> csvData = createCsvSumary();
+                    writer.writeAll(csvData);
+                    JOptionPane.showMessageDialog(null, "Data tersimpan", "Info", JOptionPane.INFORMATION_MESSAGE);
+                }
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, e.getMessage());
+            }
+        }
+    }//GEN-LAST:event_btnSaveSumaryActionPerformed
 
     
-    private List<String[]> createCsvDataSimple() {
+    private List<String[]> createCsvDataXYZ() {
         String[] header = {"TIME", "X", "Y", "Z"};
         
         List<String[]> list = new ArrayList<>();
@@ -445,14 +477,31 @@ public class FormDashboard extends javax.swing.JPanel {
         }
         return list;
     }
+    
+    private List<String[]> createCsvSumary() {
+        String[] header = {"RMS X", "RMS Y", "RMS Z"
+                , "AVG X", "AVG Y", "AVG Z"
+                , "MAX X", "MAX Y", "MAX Z"
+                , "MIN X", "MIN Y", "MIN Z"};
+        
+        List<String[]> list = new ArrayList<>();
+        list.add(header);
+        String[] body = {cardRMS.getValue(), cardRMS.getValue1(), cardRMS.getValue2(), 
+            cardAverage.getValue(), cardAverage.getValue1(), cardAverage.getValue2(),
+            cardMax.getValue(), cardMax.getValue1(), cardMax.getValue2(),
+            cardMin.getValue(), cardMin.getValue1(), cardMin.getValue2()};
+        list.add(body);
+        
+        return list;
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel batas;
     private javax.swing.JPanel batasAtas;
-    private javax.swing.JButton btnAnalisis;
     private javax.swing.JButton btnCalibrasi;
     private javax.swing.JButton btnConnect;
-    private javax.swing.JButton btnSave;
+    private javax.swing.JButton btnSaveSumary;
+    private javax.swing.JButton btnSaveXYZ;
     private component.Card cardAlarm;
     private component.Card cardAverage;
     private component.Card cardMax;

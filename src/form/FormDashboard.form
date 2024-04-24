@@ -290,18 +290,21 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCalibrasiActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JButton" name="btnSave">
+        <Component class="javax.swing.JButton" name="btnSaveXYZ">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Save"/>
+            <Property name="text" type="java.lang.String" value="Save XYZ"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSaveActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSaveXYZActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JButton" name="btnAnalisis">
+        <Component class="javax.swing.JButton" name="btnSaveSumary">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Analisis"/>
+            <Property name="text" type="java.lang.String" value="Save Summary"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSaveSumaryActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

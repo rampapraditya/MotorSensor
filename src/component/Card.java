@@ -53,6 +53,17 @@ public class Card extends javax.swing.JPanel {
     public void setValue2(String nilai) {
         lbValues2.setText(nilai);
     }
+    
+    public String getValue() {
+        return lbValues.getText();
+    }
+    
+    public String getValue1() {
+        return lbValues1.getText();
+    }
+    public String getValue2() {
+        return lbValues2.getText();
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
