@@ -99,8 +99,10 @@ public class Main extends Application {
         Platform.setImplicitExit(false);
         XYChart.Series<Number, Number> series01 = new XYChart.Series<Number, Number>();
         series01.setName("Candidate Not Hired");
+        
         XYChart.Series<Number, Number> series02 = new XYChart.Series<Number, Number>();
         series02.setName("Candidate Hired");
+        
         IntStream.range(0, Main.TRAINING_DATA.length).forEach(i -> {
             double x = Main.TRAINING_DATA[i][0][0], y = Main.TRAINING_DATA[i][0][1];
             if (Main.TRAINING_DATA[i][1][0] == -1.0) {
@@ -116,6 +118,7 @@ public class Main extends Application {
         ScatterChart<Number, Number> scatterChart = new ScatterChart<Number, Number>(xAxis, yAxis);
         scatterChart.getData().add(series01);
         scatterChart.getData().add(series02);
+        
         double m = -(svm.getW().getData()[0][0] / svm.getW().getData()[1][0]);
         double b = -(svm.getB() / svm.getW().getData()[1][0]);
         double score1X = 0.00, score1Y = m * score1X + b, score2X = 10.00, score2Y = m * score2X + b;

@@ -4,10 +4,7 @@
  */
 package coba;
 
-import static coba.Main.TRAINING_DATA;
 import static coba.Main.ZERO;
-import static coba.Main.displayInfoTables;
-import static coba.Main.svm;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

@@ -1,9 +1,26 @@
 package coba;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.stream.IntStream;
+import javax.swing.JFileChooser;
+import javax.swing.SwingWorker;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
 import modul.Global;
+import modul.Sqlmodul;
+import org.apache.commons.math3.exception.DimensionMismatchException;
+import org.apache.commons.math3.exception.NoDataException;
+import org.apache.commons.math3.exception.NullArgumentException;
+import org.apache.commons.math3.linear.MatrixUtils;
 
 /**
  *
@@ -11,8 +28,10 @@ import modul.Global;
  */
 public class FormContoh extends javax.swing.JFrame {
 
-    private Global g = new Global();
-    
+    private final Global g = new Global();
+    private final Sqlmodul sql = new Sqlmodul();
+    private SupportVectorMachines svm = null;
+
     private double[][][] TRAINING_DATA = {{
         {9.123456, 3.123456}, {+1}},
     {{9.123456, 5.123456}, {+1}},
@@ -51,6 +70,11 @@ public class FormContoh extends javax.swing.JFrame {
         btn1 = new javax.swing.JButton();
         btnFromCSV = new javax.swing.JButton();
         btnCSVdb = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        btnTrain = new javax.swing.JButton();
+        jProgressBar1 = new javax.swing.JProgressBar();
+        btnKlasifikasi = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -61,17 +85,54 @@ public class FormContoh extends javax.swing.JFrame {
             }
         });
 
-        btnFromCSV.setText("Read From CSV");
+        btnFromCSV.setText("2. Insert");
         btnFromCSV.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnFromCSVActionPerformed(evt);
             }
         });
 
-        btnCSVdb.setText("Read Read CSV Insert DB");
+        btnCSVdb.setText("1. Read CSV File");
         btnCSVdb.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCSVdbActionPerformed(evt);
+            }
+        });
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Max (X)", "Min (X)", "Status"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTable1MouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(jTable1);
+
+        btnTrain.setText("3. Train Data");
+        btnTrain.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTrainActionPerformed(evt);
+            }
+        });
+
+        btnKlasifikasi.setText("4. Kalsifikasi");
+        btnKlasifikasi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnKlasifikasiActionPerformed(evt);
             }
         });
 
@@ -83,8 +144,19 @@ public class FormContoh extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btn1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnFromCSV, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnCSVdb, javax.swing.GroupLayout.DEFAULT_SIZE, 241, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 622, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(btnCSVdb, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnFromCSV, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnTrain)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnKlasifikasi)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -93,10 +165,16 @@ public class FormContoh extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(btn1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnFromCSV)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnCSVdb)
+                    .addComponent(btnFromCSV)
+                    .addComponent(btnTrain)
+                    .addComponent(btnKlasifikasi))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnCSVdb)
-                .addContainerGap(198, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 249, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -120,28 +198,81 @@ public class FormContoh extends javax.swing.JFrame {
 
     private void btnFromCSVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFromCSVActionPerformed
         try {
-            int counter = 0;
-            Scanner sc = new Scanner(new File("MAXMINX.csv"));
-            sc.useDelimiter(",");
-            while (sc.hasNext()) {
-                if (counter > 3) {
-                    counter = 0;
-                    System.out.print("");
-                } else {
-                    System.out.print(sc.next());
-                    System.out.print("\t");
-                    counter++;
-                }
+            sql.dml("delete from log");
+            System.out.println(jTable1.getRowCount());
+
+            Connection connection = sql.getKoneksi();
+            String strsql = "insert into log (x,y,nilai) values(?,?,?);";
+            PreparedStatement pst = connection.prepareStatement(strsql);
+
+            for (int i = 0; i < jTable1.getRowCount() - 1; i++) {
+                String x = jTable1.getValueAt(i, 0).toString();
+                String y = jTable1.getValueAt(i, 1).toString();
+                String status = jTable1.getValueAt(i, 2).toString();
+
+                pst.setString(1, x);
+                pst.setString(2, y);
+                pst.setString(3, status);
+                pst.addBatch();
             }
-            sc.close();  //closes the scanner  
-        } catch (FileNotFoundException ex) {
-            System.out.println(ex.getMessage());
+
+            pst.executeBatch();
+            System.out.println("Data tersimpan");
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
         }
+
     }//GEN-LAST:event_btnFromCSVActionPerformed
 
     private void btnCSVdbActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCSVdbActionPerformed
-        System.out.println(g.cwdPath());
+        JFileChooser fileopen = new JFileChooser();
+        FileFilter filter = new FileNameExtensionFilter("Text/CSV file", "txt", "csv");
+        fileopen.addChoosableFileFilter(filter);
+        int ret = fileopen.showDialog(null, "Choose file");		// Open File
+        if (ret == JFileChooser.APPROVE_OPTION) {
+            File file = fileopen.getSelectedFile();
+            try {
+                DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+
+                BufferedReader br = new BufferedReader(new FileReader(file));
+                String line;
+                int row = 0;
+                while ((line = br.readLine()) != null) {
+                    String[] arr = line.split(",");
+                    model.addRow(new Object[0]);
+                    model.setValueAt(arr[0], row, 0);
+                    model.setValueAt(arr[1], row, 1);
+                    model.setValueAt(arr[2], row, 2);
+                    row++;
+                }
+                br.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
     }//GEN-LAST:event_btnCSVdbActionPerformed
+
+    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+        if (evt.getClickCount() == 2) {
+            String a = jTable1.getValueAt(jTable1.getSelectedRow(), 0).toString();
+            System.out.println(a);
+        }
+    }//GEN-LAST:event_jTable1MouseClicked
+
+    private void btnTrainActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTrainActionPerformed
+        jProgressBar1.setIndeterminate(true);
+        ProgresBarClass runSimpan = new ProgresBarClass();
+        runSimpan.execute();
+    }//GEN-LAST:event_btnTrainActionPerformed
+
+    private void btnKlasifikasiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKlasifikasiActionPerformed
+        try {
+            handleCommandLine();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }//GEN-LAST:event_btnKlasifikasiActionPerformed
 
     /**
      * @param args the command line arguments
@@ -182,5 +313,92 @@ public class FormContoh extends javax.swing.JFrame {
     private javax.swing.JButton btn1;
     private javax.swing.JButton btnCSVdb;
     private javax.swing.JButton btnFromCSV;
+    private javax.swing.JButton btnKlasifikasi;
+    private javax.swing.JButton btnTrain;
+    private javax.swing.JProgressBar jProgressBar1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
+
+    private void displayInfoTables(double[][] xArray, double[][] yArray) {
+        System.out.println("Support Vector | label | alpha");
+        IntStream.range(0, 50).forEach(i -> System.out.print("-"));
+        System.out.println();
+        for (int i = 0; i < xArray.length; i++) {
+            if (svm.getAlpha().getData()[i][0] > ZERO && svm.getAlpha().getData()[i][0] != SupportVectorMachines.C) {
+                StringBuffer ySB = new StringBuffer(String.valueOf(yArray[i][0]));
+                ySB.setLength(5);
+                System.out.println(Arrays.toString(xArray[i]) + " | " + ySB + " | "
+                        + new String(String.format("%.10f", svm.getAlpha().getData()[i][0])));
+            }
+        }
+        System.out.println("\n             wT              |  b  ");
+        IntStream.range(0, 50).forEach(i -> System.out.print("-"));
+        System.out.println();
+        System.out.println("<" + (new String(String.format("%.9f", svm.getW().getData()[0][0])) + ", "
+                + new String(String.format("%.9f", svm.getW().getData()[1][0]))) + ">   | " + svm.getB());
+    }
+
+    private void coba() {
+        try {
+            int length = Integer.parseInt(sql.baca("select count(*) as jml from log;"));
+            System.out.println("Traing Data " + length);
+            System.out.println("============================");
+            double[][] xArray = new double[length][2];
+            double[][] yArray = new double[length][1];
+
+            String[][] dataDB = sql.baca_array("select x, y, nilai from log", length, 3);
+
+            for (int i = 0; i < length; i++) {
+                xArray[i][0] = Double.parseDouble(dataDB[i][0]);
+                xArray[i][1] = Double.parseDouble(dataDB[i][1]);
+                yArray[i][0] = Double.parseDouble(dataDB[i][2]);
+
+                System.out.println(xArray[i][0] + " " + xArray[i][1] + " " + yArray[i][0]);
+            }
+
+            svm = new SupportVectorMachines(MatrixUtils.createRealMatrix(xArray), MatrixUtils.createRealMatrix(yArray));
+            displayInfoTables(xArray, yArray);
+
+        } catch (NumberFormatException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void handleCommandLine() throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+        while (true) {
+            System.out.println("\n> to classify 1 , 2 atau 3 :");
+            String[] values = (bufferedReader.readLine()).split(" ");
+            if (values[0].equals("exit")) {
+                System.exit(0);
+            } else {
+                try {
+                    System.out.println(svm.classify(
+                            MatrixUtils.createRealMatrix(new double[][]{{Double.valueOf(values[0]), Double.valueOf(values[1])}})));
+                } catch (NumberFormatException | DimensionMismatchException | NoDataException | NullArgumentException e) {
+                    System.out.println("invalid input");
+                }
+            }
+        }
+    }
+
+    private class ProgresBarClass extends SwingWorker<String, Void> {
+
+        @Override
+        protected void done() {
+            jProgressBar1.setIndeterminate(false);
+        }
+
+        @Override
+        protected String doInBackground() {
+            String hasil = "sukses";
+            try {
+                coba();
+            } catch (Exception e) {
+                hasil = e.getMessage();
+            }
+            return hasil;
+        }
+    }
 }

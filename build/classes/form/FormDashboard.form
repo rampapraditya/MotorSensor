@@ -93,15 +93,7 @@
             </Property>
           </Properties>
         </Component>
-        <Component class="component.Card" name="cardAlarm">
-          <Properties>
-            <Property name="color1" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="9" green="8f" red="bd" type="rgb"/>
-            </Property>
-            <Property name="color2" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="a" green="46" red="58" type="rgb"/>
-            </Property>
-          </Properties>
+        <Component class="component.CardHasil" name="cardHasil">
         </Component>
       </SubComponents>
     </Container>
@@ -304,6 +296,43 @@
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSaveSumaryActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JToggleButton" name="btnSaveByTime">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Save By Time"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnResetData">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Reset Data"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnResetDataActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JToggleButton" name="btnPompa">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Pompa On"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnPompaActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnBearing">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Bearing"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnBearingActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="jButton2">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Impeler"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton2ActionPerformed"/>
           </Events>
         </Component>
       </SubComponents>
