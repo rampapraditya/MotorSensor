@@ -3,6 +3,7 @@ package form;
 import com.fazecast.jSerialComm.SerialPort;
 import com.opencsv.CSVWriter;
 import java.awt.Color;
+import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -20,6 +21,12 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import model.CardKhusus;
 import model.ModelCard;
 import modul.Global;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -76,6 +83,11 @@ public class FormDashboard extends javax.swing.JPanel {
 
     private boolean statusPompa = false;
 
+    private boolean statusNormal = false;
+    private boolean statusBearing = false;
+    private boolean statusAwal = false;
+    private boolean statusAnalisa = false;
+
     private JFreeChart chartXA, chartYA, chartZA;
     private XYDataset datasetTempXA, datasetTempYA, datasetTempZA;
 
@@ -98,28 +110,28 @@ public class FormDashboard extends javax.swing.JPanel {
         }
 
         datasetTempXA = createDatasetXA();
-        chartXA = createChart(datasetTempXA, "X Axis", "Time", "Acceleration", 0);
+        chartXA = createChart(datasetTempXA, "X Axis", "Time", "Acceleration (mm/S^2)", 0);
         chartXA.setBackgroundPaint(Color.white);
         ChartPanel chartPanelXA = new ChartPanel(chartXA);
         panelLineX.add(chartPanelXA);
         panelLineX.setBackground(Color.white);
 
         datasetTempYA = createDatasetYA();
-        chartYA = createChart(datasetTempYA, "Y Axis", "Time", "Acceleration", 1);
+        chartYA = createChart(datasetTempYA, "Y Axis", "Time", "Acceleration (mm/S^2)", 1);
         chartYA.setBackgroundPaint(Color.white);
         ChartPanel chartPanelYA = new ChartPanel(chartYA);
         panelLineY.add(chartPanelYA);
         panelLineY.setBackground(Color.white);
 
         datasetTempZA = createDatasetZA();
-        chartZA = createChart(datasetTempZA, "Z Axis", "Time", "Acceleration", 2);
+        chartZA = createChart(datasetTempZA, "Z Axis", "Time", "Acceleration (mm/S^2)", 2);
         chartZA.setBackgroundPaint(Color.white);
         ChartPanel chartPanelZA = new ChartPanel(chartZA);
         panelLineZ.add(chartPanelZA);
         panelLineZ.setBackground(Color.white);
 
         XYDataset datasetFn = createDataset();
-        JFreeChart chart = createChart(datasetFn, "XYZ Axis", "Time", "Acceleration", 3);
+        JFreeChart chart = createChart(datasetFn, "XYZ Axis", "Time", "Acceleration (mm/S^2)", 3);
         chart.setBackgroundPaint(Color.white);
         ChartPanel chartPanel = new ChartPanel(chart);
         panelGrafikTengah.add(chartPanel);
@@ -154,10 +166,8 @@ public class FormDashboard extends javax.swing.JPanel {
         btnSaveXYZ = new javax.swing.JButton();
         btnSaveSumary = new javax.swing.JButton();
         btnSaveByTime = new javax.swing.JToggleButton();
-        btnResetData = new javax.swing.JButton();
         btnPompa = new javax.swing.JToggleButton();
-        btnBearing = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        btnAnalisa = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(250, 250, 250));
         setLayout(new java.awt.BorderLayout());
@@ -272,17 +282,19 @@ public class FormDashboard extends javax.swing.JPanel {
         panelBawah.add(btnSaveSumary);
 
         btnSaveByTime.setText("Save By Time");
-        panelBawah.add(btnSaveByTime);
-
-        btnResetData.setText("Reset Data");
-        btnResetData.addActionListener(new java.awt.event.ActionListener() {
+        btnSaveByTime.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnResetDataActionPerformed(evt);
+                btnSaveByTimeActionPerformed(evt);
             }
         });
-        panelBawah.add(btnResetData);
+        panelBawah.add(btnSaveByTime);
 
         btnPompa.setText("Pompa On");
+        btnPompa.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                btnPompaStateChanged(evt);
+            }
+        });
         btnPompa.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPompaActionPerformed(evt);
@@ -290,21 +302,13 @@ public class FormDashboard extends javax.swing.JPanel {
         });
         panelBawah.add(btnPompa);
 
-        btnBearing.setText("Bearing");
-        btnBearing.addActionListener(new java.awt.event.ActionListener() {
+        btnAnalisa.setText("Analisa");
+        btnAnalisa.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnBearingActionPerformed(evt);
+                btnAnalisaActionPerformed(evt);
             }
         });
-        panelBawah.add(btnBearing);
-
-        jButton2.setText("Impeler");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
-            }
-        });
-        panelBawah.add(jButton2);
+        panelBawah.add(btnAnalisa);
 
         add(panelBawah, java.awt.BorderLayout.SOUTH);
     }// </editor-fold>//GEN-END:initComponents
@@ -503,21 +507,26 @@ public class FormDashboard extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_btnSaveSumaryActionPerformed
 
-    private void btnResetDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetDataActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnResetDataActionPerformed
-
     private void btnPompaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPompaActionPerformed
         OutputStream outputStream = serial.getOutputStream();
+
         String dataToSend = "";
-        if (!statusPompa) {
+        if (btnPompa.isSelected()) {
             dataToSend = "1";
-            btnPompa.setText("Pompa On");
+            btnPompa.setText("Pompa Off");
             statusPompa = true;
+            statusAwal = true;
+
         } else {
             dataToSend = "0";
-            btnPompa.setText("Pompa Off");
+            btnPompa.setText("Pompa On");
             statusPompa = false;
+
+            // reset
+            statusNormal = false;
+            statusBearing = false;
+            statusAwal = false;
+            statusAnalisa = false;
         }
         try {
             outputStream.write(dataToSend.getBytes());
@@ -526,29 +535,19 @@ public class FormDashboard extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_btnPompaActionPerformed
 
-    private void btnBearingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBearingActionPerformed
+    private void btnAnalisaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAnalisaActionPerformed
         if (statusPompa) {
-            OutputStream outputStream = serial.getOutputStream();
-            String dataToSend = "2";
-            try {
-                outputStream.write(dataToSend.getBytes());
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, e.getMessage());
-            }
+            statusAnalisa = true;
         }
-    }//GEN-LAST:event_btnBearingActionPerformed
+    }//GEN-LAST:event_btnAnalisaActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        if (statusPompa) {
-            OutputStream outputStream = serial.getOutputStream();
-            String dataToSend = "3";
-            try {
-                outputStream.write(dataToSend.getBytes());
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, e.getMessage());
-            }
-        }
-    }//GEN-LAST:event_jButton2ActionPerformed
+    private void btnSaveByTimeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveByTimeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnSaveByTimeActionPerformed
+
+    private void btnPompaStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_btnPompaStateChanged
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnPompaStateChanged
 
     private List<String[]> createCsvDataXYZ() {
         String[] header = {"TIME", "X", "Y", "Z"};
@@ -586,11 +585,10 @@ public class FormDashboard extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel batas;
     private javax.swing.JPanel batasAtas;
-    private javax.swing.JButton btnBearing;
+    private javax.swing.JButton btnAnalisa;
     private javax.swing.JButton btnCalibrasi;
     private javax.swing.JButton btnConnect;
     private javax.swing.JToggleButton btnPompa;
-    private javax.swing.JButton btnResetData;
     private javax.swing.JToggleButton btnSaveByTime;
     private javax.swing.JButton btnSaveSumary;
     private javax.swing.JButton btnSaveXYZ;
@@ -601,7 +599,6 @@ public class FormDashboard extends javax.swing.JPanel {
     private component.Card cardPure;
     private component.Card cardRMS;
     private javax.swing.JComboBox<String> cbCom;
-    private javax.swing.JButton jButton2;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel lineAtas;
     private javax.swing.JPanel lineTengah;
@@ -654,11 +651,10 @@ public class FormDashboard extends javax.swing.JPanel {
                 String a = g.pembulatan(RMS_X);
                 String b = g.pembulatan(RMS_Y);
                 String c = g.pembulatan(RMS_Z);
-                
+
                 cardRMS.setValue("X : " + a);
                 cardRMS.setValue1("Y : " + b);
                 cardRMS.setValue2("Z : " + c);
-                
 
                 // menghitung rata2
                 double rata_xa = jml_xa / 20;
@@ -676,36 +672,58 @@ public class FormDashboard extends javax.swing.JPanel {
                 double max_x = Collections.max(wadah_xa);
                 double max_y = Collections.max(wadah_ya);
                 double max_z = Collections.max(wadah_za);
-                aa = g.pembulatan(max_x);
-                bb = g.pembulatan(max_y);
-                cc = g.pembulatan(max_z);
-                cardMax.setValue("X : " + aa);
-                cardMax.setValue1("Y : " + bb);
-                cardMax.setValue2("Z : " + cc);
+                String aa_max = g.pembulatan(max_x);
+                String bb_max = g.pembulatan(max_y);
+                String cc_max = g.pembulatan(max_z);
+                cardMax.setValue("X : " + aa_max);
+                cardMax.setValue1("Y : " + bb_max);
+                cardMax.setValue2("Z : " + cc_max);
 
                 // mencari minimal
                 double min_x = Collections.min(wadah_xa);
                 double min_y = Collections.min(wadah_ya);
                 double min_z = Collections.min(wadah_za);
-                aa = g.pembulatan(min_x);
-                bb = g.pembulatan(min_y);
-                cc = g.pembulatan(min_z);
-                cardMin.setValue("X : " + aa);
-                cardMin.setValue1("Y : " + bb);
-                cardMin.setValue2("Z : " + cc);
+                String aa_min = g.pembulatan(min_x);
+                String bb_min = g.pembulatan(min_y);
+                String cc_min = g.pembulatan(min_z);
+                cardMin.setValue("X : " + aa_min);
+                cardMin.setValue1("Y : " + bb_min);
+                cardMin.setValue2("Z : " + cc_min);
 
                 // --------------------------------- RUMUSAN ANALISA ---------------------------------
-                if ((max_x >= 1.6 && max_x <= 3.5) || (min_x >= -3.1 && min_x <= -1.3)) {
-                    System.out.println("Bearing");
-                } 
-                else if ((max_x >= 0.4 && max_x <= 1) || (min_x >= -0.4 && min_x <= -1.25)) {
-                    System.out.println("Impeller");
-                } 
-                else if ((max_x >= 0 && max_x <= 0.2) || (min_x >= 0 && min_x <= -0.2)) {
-                    System.out.println("Normal");
-                }
-                // -----------------------------------------------------------------------------------
+                // patokan max z dan min z
+                try {
+                    if (statusAnalisa) {
+                        String hasil_analisa = sendPredictionRequest(cc_min + " " + cc_max);
+                        System.out.println(hasil_analisa);
+                        if (statusBearing && statusNormal) {
+                            cardHasil.setHasil("Impeller");
+                        } else {
+                            if (hasil_analisa.equals("1")) {
+                                cardHasil.setHasil("Bearing");
+                                statusBearing = true;
+                            } else if (hasil_analisa.equals("3")) {
+                                cardHasil.setHasil("Normal");
+                                if (statusAwal) {
+                                    statusNormal = true;
+                                }
+                            }
+                        }
+                    }else{
+                        cardHasil.setHasil("Normal");
+                    }
 
+                } catch (Exception e) {
+                }
+
+//                if ((max_x >= 1.6 && max_x <= 3.5) || (min_x >= -3.1 && min_x <= -1.3)) {
+//                    System.out.println("Bearing");
+//                } else if ((max_x >= 0.4 && max_x <= 1) || (min_x >= -0.4 && min_x <= -1.25)) {
+//                    System.out.println("Impeller");
+//                } else if ((max_x >= 0 && max_x <= 0.2) || (min_x >= 0 && min_x <= -0.2)) {
+//                    System.out.println("Normal");
+//                }
+                // -----------------------------------------------------------------------------------
             } catch (NumberFormatException e) {
                 jml_xa = 0;
                 jml_ya = 0;
@@ -779,5 +797,24 @@ public class FormDashboard extends javax.swing.JPanel {
         datasetFinal.addSeries(seriesZA);
 
         return datasetFinal;
+    }
+
+    private String sendPredictionRequest(String message) {
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpPost request = new HttpPost("http://localhost:5000/predict");
+            JSONObject json = new JSONObject();
+            json.put("features", message);
+            StringEntity entity = new StringEntity(json.toString());
+            request.setEntity(entity);
+            request.setHeader("Content-type", "application/json");
+
+            CloseableHttpResponse response = httpClient.execute(request);
+            String jsonResponse = EntityUtils.toString(response.getEntity());
+            JSONObject responseObject = new JSONObject(jsonResponse);
+            return responseObject.get("prediction").toString();
+
+        } catch (Exception e) {
+            return "Error";
+        }
     }
 }

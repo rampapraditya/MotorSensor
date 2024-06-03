@@ -34,5 +34,4 @@ public class CardKhusus {
         return warna;
     }
     
-    
 }

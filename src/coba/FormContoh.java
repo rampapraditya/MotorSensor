@@ -129,7 +129,7 @@ public class FormContoh extends javax.swing.JFrame {
             }
         });
 
-        btnKlasifikasi.setText("4. Kalsifikasi");
+        btnKlasifikasi.setText("4. Klasifikasi");
         btnKlasifikasi.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnKlasifikasiActionPerformed(evt);
@@ -268,8 +268,8 @@ public class FormContoh extends javax.swing.JFrame {
 
     private void btnKlasifikasiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKlasifikasiActionPerformed
         try {
-            handleCommandLine();
-        } catch (IOException e) {
+            
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }//GEN-LAST:event_btnKlasifikasiActionPerformed
