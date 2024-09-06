@@ -2,6 +2,7 @@ package form;
 
 import com.fazecast.jSerialComm.SerialPort;
 import com.opencsv.CSVWriter;
+import entitas.Tampung;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -16,6 +17,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -96,7 +99,7 @@ public class FormDashboard extends javax.swing.JPanel {
     
     private boolean ambilData = false;
     private boolean tampung = false;
-    private ArrayList<String[]> dataTampung = new ArrayList<String[]>();
+    private ArrayList<Tampung> dataTampung = new ArrayList<>();
     
     private int jumlahNormal = 0;
 
@@ -195,7 +198,7 @@ public class FormDashboard extends javax.swing.JPanel {
         btnSaveXYZ = new javax.swing.JButton();
         btnSaveSumary = new javax.swing.JButton();
         btnSaveByTime = new javax.swing.JToggleButton();
-        jButton1 = new javax.swing.JButton();
+        btnSaveTampung = new javax.swing.JButton();
         btnPompa = new javax.swing.JToggleButton();
         btnAnalisa = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
@@ -326,13 +329,13 @@ public class FormDashboard extends javax.swing.JPanel {
         });
         jPanel1.add(btnSaveByTime);
 
-        jButton1.setText("Save Data Tampung");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnSaveTampung.setText("Save Data Tampung");
+        btnSaveTampung.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnSaveTampungActionPerformed(evt);
             }
         });
-        jPanel1.add(jButton1);
+        jPanel1.add(btnSaveTampung);
 
         btnPompa.setText("Pompa On");
         btnPompa.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -399,10 +402,6 @@ public class FormDashboard extends javax.swing.JPanel {
                                     double za = Double.parseDouble(obj.get("za").toString());
                                     String waktu = g.curTime(new Date());
                                     
-                                    if (tampung) {
-                                        dataTampung.add(new String[]{waktu, String.valueOf(xa), String.valueOf(ya), String.valueOf(za)});
-                                    }
-
                                     if (statusKalibrasi) {
                                         if (tandaBacaX.equals("+")) {
                                             xa += nilaiAcuanX;
@@ -621,20 +620,34 @@ public class FormDashboard extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_btnSaveByTimeItemStateChanged
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnSaveTampungActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveTampungActionPerformed
         if (!tampung) {
             JFileChooser fileChooser = new JFileChooser();
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("Csv file", "csv");
             fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+            fileChooser.setFileFilter(filter);
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
-                File selectedFile = fileChooser.getSelectedFile();
-                System.out.println("Selected file: " + selectedFile.getAbsolutePath());
-                writeDataAtOnce(selectedFile.getAbsolutePath());
+                File file = fileChooser.getSelectedFile();
+                
+                String absolutePath = file.getAbsolutePath();
+		if (!absolutePath.substring(absolutePath.lastIndexOf(".") + 1).equals("csv")) {
+			absolutePath += ".csv";
+		}
+                
+                //writeDataAtOnce(absolutePath);
+                try (FileWriter myWriter = new FileWriter(absolutePath); CSVWriter writer = new CSVWriter(myWriter)) {
+                    List<String[]> csvData = createCsvDataTampung();
+                    writer.writeAll(csvData);
+                    JOptionPane.showMessageDialog(null, "Data tersimpan", "Info", JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    Logger.getLogger(FormDashboard.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }else{
             JOptionPane.showMessageDialog(null, "Angkat button tampung");
         }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnSaveTampungActionPerformed
 
     private List<String[]> createCsvDataXYZ() {
         String[] header = {"TIME", "X", "Y", "Z"};
@@ -647,6 +660,22 @@ public class FormDashboard extends javax.swing.JPanel {
                 wadah_xaFull.get(i).toString(),
                 wadah_yaFull.get(i).toString(),
                 wadah_zaFull.get(i).toString()};
+            list.add(record1);
+        }
+        return list;
+    }
+    
+    private List<String[]> createCsvDataTampung() {
+        String[] header = {"TIME", "X", "Y", "Z"};
+
+        List<String[]> list = new ArrayList<>();
+        list.add(header);
+
+        for (int i = 0; i < dataTampung.size(); i++) {
+            String[] record1 = {dataTampung.get(i).getWaktu(),
+                dataTampung.get(i).getX(),
+                dataTampung.get(i).getY(),
+                dataTampung.get(i).getZ()};
             list.add(record1);
         }
         return list;
@@ -678,6 +707,7 @@ public class FormDashboard extends javax.swing.JPanel {
     private javax.swing.JToggleButton btnPompa;
     private javax.swing.JToggleButton btnSaveByTime;
     private javax.swing.JButton btnSaveSumary;
+    private javax.swing.JButton btnSaveTampung;
     private javax.swing.JButton btnSaveXYZ;
     private component.Card cardAverage;
     private component.CardHasil cardHasil;
@@ -686,7 +716,6 @@ public class FormDashboard extends javax.swing.JPanel {
     private component.Card cardPure;
     private component.Card cardRMS;
     private javax.swing.JComboBox<String> cbCom;
-    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -707,7 +736,12 @@ public class FormDashboard extends javax.swing.JPanel {
         try {
             FileWriter outputfile = new FileWriter(file);
             CSVWriter writer = new CSVWriter(outputfile);
-            writer.writeAll(dataTampung);
+            ArrayList<String[]> temp = new ArrayList<>();
+            for (int i = 0; i < dataTampung.size(); i++) {
+                String data1[] = new String[]{dataTampung.get(i).getWaktu(), dataTampung.get(i).getX(), dataTampung.get(i).getY(),dataTampung.get(i).getZ()};
+                temp.add(data1);
+            }
+            writer.writeAll(temp);
             writer.close();
             JOptionPane.showMessageDialog(null, "Data tersimpan");
         } catch (IOException e) {
@@ -735,6 +769,15 @@ public class FormDashboard extends javax.swing.JPanel {
         wadah_xa.add(x);
         wadah_ya.add(y);
         wadah_za.add(z);
+        
+        if (tampung) {
+            Tampung tam = new Tampung();
+            tam.setWaktu(waktu);
+            tam.setX(String.valueOf(x));
+            tam.setY(String.valueOf(y));
+            tam.setZ(String.valueOf(z));
+            dataTampung.add(tam);
+        }
 
         if (wadah_xa.size() > 19) {
             double jml_xa = 0;
