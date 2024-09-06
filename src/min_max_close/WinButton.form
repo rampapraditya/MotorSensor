@@ -18,9 +18,11 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="cmdMenu" min="-2" pref="50" max="-2" attributes="0"/>
-              <EmptySpace pref="255" max="32767" attributes="0"/>
-              <Component id="winButton1" min="-2" max="-2" attributes="0"/>
+              <Component id="cmdMi" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="cmdRe" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="cmdClose" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -28,28 +30,38 @@
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="winButton1" min="-2" max="-2" attributes="0"/>
-                  <Component id="cmdMenu" min="-2" max="-2" attributes="0"/>
+                  <Component id="cmdClose" min="-2" max="-2" attributes="0"/>
+                  <Component id="cmdMi" min="-2" max="-2" attributes="0"/>
+                  <Component id="cmdRe" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Component class="swing.Button" name="cmdMenu">
+    <Component class="min_max_close.Button" name="cmdClose">
       <Properties>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="fa" green="fa" red="fa" type="rgb"/>
-        </Property>
-        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="3" name="/icon/menu.png"/>
+          <Color blue="3d" green="3d" red="f0" type="rgb"/>
         </Property>
       </Properties>
     </Component>
-    <Component class="min_max_close.WinButton" name="winButton1">
+    <Component class="min_max_close.Button" name="cmdMi">
+      <Properties>
+        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="44" green="e2" red="e3" type="rgb"/>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="min_max_close.Button" name="cmdRe">
+      <Properties>
+        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="33" green="c7" red="43" type="rgb"/>
+        </Property>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

@@ -19,7 +19,9 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Component id="cmdMenu" min="-2" pref="50" max="-2" attributes="0"/>
-              <EmptySpace pref="344" max="32767" attributes="0"/>
+              <EmptySpace pref="255" max="32767" attributes="0"/>
+              <Component id="winButton1" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -27,7 +29,10 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="cmdMenu" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="winButton1" min="-2" max="-2" attributes="0"/>
+                  <Component id="cmdMenu" min="-2" max="-2" attributes="0"/>
+              </Group>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
@@ -43,6 +48,8 @@
           <Image iconType="3" name="/icon/menu.png"/>
         </Property>
       </Properties>
+    </Component>
+    <Component class="min_max_close.WinButton" name="winButton1">
     </Component>
   </SubComponents>
 </Form>
